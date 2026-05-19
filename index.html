@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>InventoryLens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f0f0f0;--surface:#ffffff;--surface2:#e8e8e8;--surface3:#d8d8d8;
+  --border:#bbb;--accent:#e05a00;--accent2:#c04d00;
+  --text:#111111;--text2:#444444;--text3:#777777;
+  --danger:#c0392b;--success:#1e8449;--info:#2980b9;
+  --radius:14px;--radius-sm:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;min-height:100vh;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.header-logo{display:flex;align-items:center;gap:8px;}
+.header-logo .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;}
+.header-logo span{font-size:20px;font-weight:800;letter-spacing:-0.5px;}
+.header-logo span em{color:var(--accent);font-style:normal;}
+.header-right{display:flex;align-items:center;gap:10px;}
+.last-refresh{font-size:11px;color:var(--text3);font-weight:600;}
+.btn-refresh{padding:8px 14px;background:var(--accent);color:#fff;font-size:13px;font-weight:700;border:none;border-radius:20px;cursor:pointer;font-family:inherit;}
+.btn-refresh:disabled{opacity:0.5;}
+.loading-bar{height:3px;background:var(--accent);display:none;animation:loadpulse 1s ease infinite;}
+@keyframes loadpulse{0%,100%{opacity:0.4;}50%{opacity:1;}}
+.main{padding:16px;padding-bottom:80px;}
+.section-title{font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);margin:24px 0 12px;}
+.section-title:first-child{margin-top:0;}
+/* Pipeline summary */
+.pipeline-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px;}
+.pipeline-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px 10px;text-align:center;position:relative;}
+.pipeline-card .val{font-size:26px;font-weight:800;color:var(--accent);}
+.pipeline-card .lbl{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.8px;margin-top:4px;}
+.pipeline-arrow{display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:18px;margin:0 -4px;}
+/* Stock position cards */
+.stock-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.stock-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px 10px;text-align:center;}
+.stock-card .val{font-size:24px;font-weight:800;}
+.stock-card .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-top:4px;color:var(--text2);}
+.stock-raw .val{color:#8e44ad;}
+.stock-coated .val{color:var(--accent);}
+.stock-finished .val{color:var(--success);}
+/* Alerts */
+.alert{padding:12px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;margin-bottom:8px;}
+.alert-danger{background:rgba(192,57,43,0.08);border:1.5px solid rgba(192,57,43,0.3);color:var(--danger);}
+.alert-warning{background:rgba(243,156,18,0.08);border:1.5px solid rgba(243,156,18,0.3);color:#e67e22;}
+/* Source cards */
+.source-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.source-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;}
+.source-ok{border-color:rgba(30,132,73,0.3);}
+.source-err{border-color:rgba(192,57,43,0.3);}
+.source-name{font-size:13px;font-weight:800;color:var(--text);}
+.source-file{font-size:10px;color:var(--text3);font-family:monospace;margin-top:2px;}
+.source-stat{font-size:12px;font-weight:700;color:var(--success);margin-top:6px;}
+.source-time{font-size:11px;color:var(--text3);margin-top:2px;}
+.source-missing{color:var(--danger)!important;}
+/* Filter bar */
+.filter-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.filter-input{flex:1;min-width:120px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;padding:10px 12px;outline:none;font-family:inherit;}
+.filter-input:focus{border-color:var(--accent);}
+.filter-select{flex:1;min-width:120px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;padding:10px 12px;outline:none;font-family:inherit;-webkit-appearance:none;cursor:pointer;}
+.filter-select:focus{border-color:var(--accent);}
+.btn-clear-filter{padding:10px 14px;background:var(--surface2);color:var(--text2);font-size:13px;font-weight:700;border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;white-space:nowrap;}
+/* Tables */
+.table-wrap{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);overflow:auto;margin-bottom:8px;}
+.inv-table{width:100%;border-collapse:collapse;min-width:500px;}
+.inv-table th{font-size:11px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:0.8px;padding:10px 12px;text-align:left;border-bottom:1.5px solid var(--border);background:var(--surface2);white-space:nowrap;}
+.inv-table th.num{text-align:right;}
+.inv-table td{font-size:13px;color:var(--text);padding:10px 12px;border-bottom:1px solid var(--border);}
+.inv-table td.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;}
+.inv-table tr:last-child td{border-bottom:none;}
+.inv-table tr:hover td{background:var(--surface2);}
+.inv-table .pos{color:var(--success);}
+.inv-table .zero{color:var(--text3);}
+.inv-table .neg{color:var(--danger);font-weight:800;}
+.ft-shape{font-weight:700;color:var(--text);}
+.sku-cell{font-size:11px;color:var(--text3);font-family:monospace;margin-top:2px;}
+.section-divider td{background:var(--surface2)!important;font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:1px;padding:8px 12px!important;border-top:1.5px solid var(--border);}
+.colour-dot{display:inline-block;width:10px;height:10px;border-radius:50%;border:1px solid var(--border);margin-right:5px;vertical-align:middle;}
+/* Auth */
+.auth-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 20px;text-align:center;background:var(--bg);}
+.auth-logo{font-size:44px;font-weight:800;letter-spacing:-1px;margin-bottom:10px;}
+.auth-logo em{color:var(--accent);font-style:normal;}
+.auth-sub{font-size:16px;color:var(--text2);margin-bottom:48px;line-height:1.7;font-weight:500;}
+.btn-google{display:flex;align-items:center;gap:10px;padding:14px 24px;background:white;color:#333;font-size:15px;font-weight:600;border:none;border-radius:var(--radius);cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:12px 20px;font-size:13px;font-weight:600;z-index:300;transition:transform 0.3s;white-space:nowrap;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,0.1);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.error{border-color:var(--danger);color:var(--danger);}
+.btn-export{padding:9px 16px;background:var(--surface2);color:var(--text2);font-size:12px;font-weight:700;border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;}
+@media(max-width:480px){
+  .pipeline-row{grid-template-columns:repeat(2,1fr);}
+  .pipeline-arrow{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div id="authScreen" class="auth-screen">
+  <div class="auth-logo">Inventory<em>Lens</em></div>
+  <div class="auth-sub">Pipeline Dashboard<br>Honey Touch Warehousing</div>
+  <button class="btn-google" onclick="signIn()">
+    <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+    Sign in with Google
+  </button>
+</div>
+
+<div id="app" style="display:none">
+  <div class="header">
+    <div class="header-logo"><div class="dot"></div><span>Inventory<em>Lens</em></span></div>
+    <div class="header-right">
+      <span class="last-refresh" id="lastRefreshLabel"></span>
+      <button class="btn-refresh" id="refreshBtn" onclick="refreshAll()">&#8635; Refresh</button>
+    </div>
+  </div>
+  <div class="loading-bar" id="loadingBar"></div>
+
+  <div class="main">
+
+    <!-- DATA SOURCES -->
+    <div class="section-title">Data Sources</div>
+    <div class="source-row" id="sourceStatus">
+      <div class="source-card"><div class="source-name">StockLens</div><div class="source-stat source-missing">Loading...</div></div>
+      <div class="source-card"><div class="source-name">CoatingLens</div><div class="source-stat source-missing">Loading...</div></div>
+      <div class="source-card"><div class="source-name">PackLens</div><div class="source-stat source-missing">Loading...</div></div>
+    </div>
+
+    <!-- ALERTS -->
+    <div id="alertsBlock" style="display:none;margin-bottom:16px;"></div>
+
+    <!-- PIPELINE TOTALS -->
+    <div class="section-title">Pipeline Totals</div>
+    <div class="pipeline-row">
+      <div class="pipeline-card"><div class="val" id="cardReceived">—</div><div class="lbl">Received</div></div>
+      <div class="pipeline-card"><div class="val" id="cardCoated">—</div><div class="lbl">Coated</div></div>
+      <div class="pipeline-card"><div class="val" id="cardPacked">—</div><div class="lbl">Packed</div></div>
+      <div class="pipeline-card"><div class="val" id="cardDispatched">—</div><div class="lbl">Dispatched</div></div>
+    </div>
+
+    <!-- CURRENT STOCK -->
+    <div class="section-title">Current Stock Position</div>
+    <div class="stock-row">
+      <div class="stock-card stock-raw"><div class="val" id="cardRaw">—</div><div class="lbl">Raw</div></div>
+      <div class="stock-card stock-coated"><div class="val" id="cardCoatedStock">—</div><div class="lbl">Coated</div></div>
+      <div class="stock-card stock-finished"><div class="val" id="cardFinished">—</div><div class="lbl">Finished</div></div>
+    </div>
+
+    <!-- FRAME PIPELINE TABLE -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;margin-bottom:12px;">
+      <div class="section-title" style="margin:0;">Frame Pipeline</div>
+      <button class="btn-export" onclick="exportCSV()">Export CSV</button>
+    </div>
+    <div class="filter-row">
+      <input type="text" class="filter-input" id="filterShape" placeholder="Search shape..." oninput="applyFilters()">
+      <select class="filter-select" id="filterColour" onchange="applyFilters()">
+        <option value="">All Colours</option>
+        <option>Black</option><option>White</option><option>Golden</option><option>Ivory</option>
+      </select>
+      <button class="btn-clear-filter" onclick="clearFilters()">Clear</button>
+    </div>
+    <div class="table-wrap">
+      <table class="inv-table">
+        <thead><tr>
+          <th>Shape</th><th>Size</th><th>Colour</th>
+          <th class="num">Received</th><th class="num">Coated</th>
+          <th class="num">Raw Left</th><th class="num">Coated Left</th>
+        </tr></thead>
+        <tbody id="frameTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px;">Sign in to load data</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- PRODUCT PIPELINE TABLE -->
+    <div class="section-title" style="margin-top:24px;">Product Pipeline (Packed &amp; Dispatched)</div>
+    <div class="table-wrap">
+      <table class="inv-table">
+        <thead><tr>
+          <th>Product</th>
+          <th class="num">Packed</th><th class="num">Dispatched</th><th class="num">In Stock</th>
+        </tr></thead>
+        <tbody id="productTableBody"><tr><td colspan="4" style="text-align:center;color:var(--text3);padding:24px;">Sign in to load data</td></tr></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ───────────────────────────────────────
+const CLIENT_ID         = '801481705797-g3fpo65r67n8437eti5lknpa6gqcvf3e.apps.googleusercontent.com';
+const SCOPES            = 'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/userinfo.email';
+const STOCKLENS_FOLDER  = '1hqiHgj4uhYxGYL3g2CaCsX1ICxeHWyEN';
+const COATINGLENS_FOLDER= '1qjkky9SFF6Wi726RUiLLn1tHh94o50bI';
+const PACKLENS_FOLDER   = '1iCsWVIZ1gWwYK8yRAFQJnB26dUzkUZMh';
+
+// ── STATE ────────────────────────────────────────
+var accessToken = null;
+var slData = null; // StockLens DB
+var clData = null; // CoatingLens DB
+var plData = null; // PackLens DB
+var lastRefresh = null;
+
+// ── AUTH ─────────────────────────────────────────
+function signIn() {
+  var client = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID, scope: SCOPES,
+    callback: async function(resp) {
+      if (!resp.access_token) return;
+      accessToken = resp.access_token;
+      document.getElementById('authScreen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      await refreshAll();
+    }
+  });
+  client.requestAccessToken();
+}
+
+function signOut() {
+  accessToken = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'flex';
+}
+
+// ── DATA LOADING ──────────────────────────────────
+async function fetchDriveFile(folderId, filename) {
+  try {
+    var q = encodeURIComponent("name='" + filename + "' and '" + folderId + "' in parents and trashed=false");
+    var res = await fetch('https://www.googleapis.com/drive/v3/files?q=' + q + '&fields=files(id,modifiedTime)',
+      { headers: { Authorization: 'Bearer ' + accessToken } });
+    var data = await res.json();
+    if (!data.files || data.files.length === 0) return null;
+    var fileId = data.files[0].id;
+    var content = await fetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media',
+      { headers: { Authorization: 'Bearer ' + accessToken } });
+    var json = await content.json();
+    json._modifiedTime = data.files[0].modifiedTime;
+    return json;
+  } catch(e) { console.warn('fetchDriveFile failed:', filename, e); return null; }
+}
+
+async function refreshAll() {
+  setLoading(true);
+  try {
+    var results = await Promise.all([
+      fetchDriveFile(STOCKLENS_FOLDER,   'stocklens_db.json'),
+      fetchDriveFile(COATINGLENS_FOLDER, 'coatinglens_db.json'),
+      fetchDriveFile(PACKLENS_FOLDER,    'packlens_db.json'),
+    ]);
+    slData = results[0];
+    clData = results[1];
+    plData = results[2];
+    lastRefresh = new Date();
+    renderDashboard();
+    renderSourceStatus();
+  } catch(e) {
+    console.error('refreshAll error:', e);
+    showToast('Error loading data', 'error');
+  }
+  setLoading(false);
+}
+
+function setLoading(on) {
+  var btn = document.getElementById('refreshBtn');
+  var spinner = document.getElementById('loadingBar');
+  if (btn) btn.disabled = on;
+  if (spinner) spinner.style.display = on ? 'block' : 'none';
+}
+
+// ── PIPELINE COMPUTATION ──────────────────────────
+
+// StockLens: aggregate received by shape+size+colour (frame colour)
+function computeReceived() {
+  if (!slData || !slData.shipments) return {};
+  var map = {};
+  slData.shipments.forEach(function(s) {
+    if (s.status === 'deleted') return;
+    (s.lineItems||[]).forEach(function(l) {
+      // Chair (Eva) has no frame colour in StockLens — use shape only
+      var key = makeFrameKey(l.shape, l.size, null);
+      if (!map[key]) map[key] = { shape: l.shape, size: l.size, colour: null, received: 0 };
+      map[key].received += l.pieces;
+    });
+  });
+  return map;
+}
+
+// CoatingLens: aggregate coated by shape+size+colour
+function computeCoated() {
+  if (!clData || !clData.trolleys) return {};
+  var map = {};
+  clData.trolleys.forEach(function(t) {
+    if (t.status === 'deleted') return;
+    (t.lineItems||[]).forEach(function(l) {
+      var colour = l.colour || 'Unknown';
+      var key = makeFrameKey(l.shape, l.size, colour);
+      if (!map[key]) map[key] = { shape: l.shape, size: l.size, colour: colour, coated: 0 };
+      map[key].coated += l.pieces;
+    });
+  });
+  return map;
+}
+
+// PackLens: aggregate packed/dispatched by master_sku
+function computePacked() {
+  if (!plData || !plData.pieces) return {};
+  var map = {};
+  Object.values(plData.pieces).forEach(function(p) {
+    var msku = p.master_sku;
+    if (!map[msku]) map[msku] = {
+      master_sku: msku,
+      displayName: p.parsed ? p.parsed.displayName : msku,
+      category: p.parsed ? p.parsed.category : 'bed',
+      shape: p.parsed ? p.parsed.shape : '',
+      size: p.parsed ? p.parsed.size : '',
+      frameColour: p.parsed ? p.parsed.frameColour : '',
+      mattressType: p.parsed ? p.parsed.mattressType : '',
+      packed: 0, dispatched: 0,
+    };
+    // dispatched counts as packed too
+    if (p.status === 'packed' || p.status === 'dispatched') map[msku].packed++;
+    if (p.status === 'dispatched') map[msku].dispatched++;
+  });
+  return map;
+}
+
+function makeFrameKey(shape, size, colour) {
+  return (shape||'') + '|' + (size||'') + (colour ? '|' + colour : '');
+}
+
+// Build combined pipeline
+function buildPipeline() {
+  var received = computeReceived();
+  var coated   = computeCoated();
+  var packed   = computePacked();
+
+  // Total summary numbers
+  var totalReceived   = Object.values(received).reduce(function(s,r){ return s+r.received; }, 0);
+  var totalCoated     = Object.values(coated).reduce(function(s,r){ return s+r.coated; }, 0);
+  var totalPacked     = Object.values(packed).reduce(function(s,r){ return s+r.packed; }, 0);
+  var totalDispatched = Object.values(packed).reduce(function(s,r){ return s+r.dispatched; }, 0);
+
+  // Frame-level pipeline — merge received + coated keys
+  var frameKeys = new Set(Object.keys(received).concat(Object.keys(coated)));
+  var frameRows = [];
+  frameKeys.forEach(function(key) {
+    var r = received[key] || {};
+    var c = coated[key]   || {};
+    var shape   = r.shape  || c.shape  || '';
+    var size    = r.size   || c.size   || '';
+    var colour  = r.colour || c.colour || null;
+    var rec     = r.received || 0;
+    var coa     = c.coated   || 0;
+    var rawLeft    = rec - coa;
+    // coated left = coated - packed (at frame level, sum packed for this shape+size+colour)
+    var packedForFrame = 0;
+    Object.values(packed).forEach(function(pk) {
+      if (pk.shape === shape && pk.size === size) {
+        if (!colour || pk.frameColour === colour) packedForFrame += pk.packed;
+      }
+    });
+    var coatedLeft = coa - packedForFrame;
+
+    // Eva chair: skip coating stage
+    var isChair = (shape === 'Eva' || size === 'Chair');
+
+    frameRows.push({
+      shape: shape, size: size, colour: colour,
+      received: rec, coated: isChair ? null : coa,
+      rawLeft: isChair ? (rec - packedForFrame) : rawLeft,
+      coatedLeft: isChair ? null : coatedLeft,
+      isChair: isChair,
+    });
+  });
+
+  // Sort: chairs last, then by rawLeft desc
+  frameRows.sort(function(a,b) {
+    if (a.isChair !== b.isChair) return a.isChair ? 1 : -1;
+    return b.rawLeft - a.rawLeft;
+  });
+
+  // Product-level pipeline from PackLens
+  var productRows = Object.values(packed).sort(function(a,b){ return b.packed - a.packed; });
+
+  return {
+    totals: { received: totalReceived, coated: totalCoated, packed: totalPacked, dispatched: totalDispatched },
+    frameRows: frameRows,
+    productRows: productRows,
+  };
+}
+
+// ── RENDER DASHBOARD ──────────────────────────────
+function renderDashboard() {
+  var pipeline = buildPipeline();
+  var t = pipeline.totals;
+
+  // Pipeline cards
+  document.getElementById('cardReceived').textContent   = t.received;
+  document.getElementById('cardCoated').textContent     = t.coated;
+  document.getElementById('cardPacked').textContent     = t.packed;
+  document.getElementById('cardDispatched').textContent = t.dispatched;
+
+  // Derived totals
+  var rawStock     = t.received - t.coated;
+  var coatedStock  = t.coated - t.packed;
+  var finishedStock= t.packed - t.dispatched;
+  document.getElementById('cardRaw').textContent      = Math.max(0, rawStock);
+  document.getElementById('cardCoatedStock').textContent = Math.max(0, coatedStock);
+  document.getElementById('cardFinished').textContent = Math.max(0, finishedStock);
+
+  // Alerts
+  var alerts = [];
+  if (rawStock < 0)     alerts.push({ type: 'danger', msg: 'Coated pieces (' + t.coated + ') exceed received (' + t.received + '). Check StockLens entries.' });
+  if (coatedStock < 0)  alerts.push({ type: 'danger', msg: 'Packed pieces (' + t.packed + ') exceed coated (' + t.coated + '). Missing CoatingLens entries.' });
+  renderAlerts(alerts);
+
+  // Frame table
+  renderFrameTable(pipeline.frameRows);
+
+  // Product table
+  renderProductTable(pipeline.productRows);
+
+  // Last refresh
+  if (lastRefresh) {
+    document.getElementById('lastRefreshLabel').textContent = 'Updated ' + lastRefresh.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  }
+}
+
+function renderAlerts(alerts) {
+  var el = document.getElementById('alertsBlock');
+  if (alerts.length === 0) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  el.innerHTML = alerts.map(function(a) {
+    return '<div class="alert alert-' + a.type + '">'
+      + (a.type === 'danger' ? '\u26a0\ufe0f ' : '\u26a0\ufe0f ') + a.msg + '</div>';
+  }).join('');
+}
+
+function renderFrameTable(rows) {
+  var el = document.getElementById('frameTableBody');
+  if (!rows || rows.length === 0) {
+    el.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px;">No data</td></tr>'; return;
+  }
+
+  // Split beds/tables from chairs
+  var bedRows   = rows.filter(function(r){ return !r.isChair; });
+  var chairRows = rows.filter(function(r){ return r.isChair; });
+
+  function renderRows(arr) {
+    return arr.map(function(r) {
+      var rawClass = r.rawLeft < 0 ? 'neg' : r.rawLeft === 0 ? 'zero' : 'pos';
+      var coatedClass = r.coatedLeft !== null ? (r.coatedLeft < 0 ? 'neg' : r.coatedLeft === 0 ? 'zero' : 'pos') : '';
+      return '<tr>'
+        + '<td><div class="ft-shape">' + (r.shape||'') + '</div></td>'
+        + '<td>' + (r.size||'') + '</td>'
+        + '<td>' + (r.colour ? '<span class="colour-dot" style="background:' + colourHex(r.colour) + '"></span>' + r.colour : '<span style="color:var(--text3)">—</span>') + '</td>'
+        + '<td class="num">' + r.received + '</td>'
+        + '<td class="num">' + (r.coated !== null ? r.coated : '<span style="color:var(--text3)">—</span>') + '</td>'
+        + '<td class="num ' + rawClass + '">' + r.rawLeft + '</td>'
+        + '<td class="num ' + coatedClass + '">' + (r.coatedLeft !== null ? r.coatedLeft : '<span style="color:var(--text3)">—</span>') + '</td>'
+        + '</tr>';
+    }).join('');
+  }
+
+  var html = renderRows(bedRows);
+  if (chairRows.length > 0) {
+    html += '<tr class="section-divider"><td colspan="7">Chair (Eva) \u2014 no coating stage</td></tr>';
+    html += renderRows(chairRows);
+  }
+  el.innerHTML = html;
+}
+
+function renderProductTable(rows) {
+  var el = document.getElementById('productTableBody');
+  if (!rows || rows.length === 0) {
+    el.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:24px;">No PackLens data</td></tr>'; return;
+  }
+  el.innerHTML = rows.map(function(r) {
+    var inStock = r.packed - r.dispatched;
+    var stockClass = inStock > 0 ? 'pos' : inStock === 0 ? 'zero' : 'neg';
+    return '<tr>'
+      + '<td><div class="ft-shape">' + r.displayName + '</div><div class="sku-cell">' + r.master_sku + '</div></td>'
+      + '<td class="num">' + r.packed + '</td>'
+      + '<td class="num">' + r.dispatched + '</td>'
+      + '<td class="num ' + stockClass + '">' + inStock + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+function colourHex(colour) {
+  var map = { 'Black': '#222', 'White': '#eee', 'Golden': '#c8a84b', 'Ivory': '#e8dcc8' };
+  return map[colour] || '#888';
+}
+
+// ── SOURCE STATUS ─────────────────────────────────
+function renderSourceStatus() {
+  function sourceCard(name, data, file) {
+    var ok = !!data;
+    var count = 0;
+    var lastMod = '';
+    if (data) {
+      if (data.shipments) count = data.shipments.filter(function(s){ return s.status !== 'deleted'; }).length;
+      if (data.trolleys)  count = data.trolleys.filter(function(t){ return t.status !== 'deleted'; }).length;
+      if (data.pieces)    count = Object.keys(data.pieces).length;
+      if (data._modifiedTime) {
+        lastMod = new Date(data._modifiedTime).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+      }
+    }
+    return '<div class="source-card ' + (ok ? 'source-ok' : 'source-err') + '">'
+      + '<div class="source-name">' + name + '</div>'
+      + '<div class="source-file">' + file + '</div>'
+      + (ok
+        ? '<div class="source-stat">' + count + ' records</div><div class="source-time">' + lastMod + '</div>'
+        : '<div class="source-stat source-missing">Not found</div>')
+      + '</div>';
+  }
+  document.getElementById('sourceStatus').innerHTML =
+    sourceCard('StockLens',   slData, 'stocklens_db.json')
+    + sourceCard('CoatingLens', clData, 'coatinglens_db.json')
+    + sourceCard('PackLens',    plData, 'packlens_db.json');
+}
+
+// ── FILTER / SEARCH ───────────────────────────────
+var activeShapeFilter = '';
+var activeColourFilter = '';
+
+function applyFilters() {
+  var shapeQ  = document.getElementById('filterShape').value.trim().toLowerCase();
+  var colourQ = document.getElementById('filterColour').value;
+  activeShapeFilter  = shapeQ;
+  activeColourFilter = colourQ;
+
+  var pipeline = buildPipeline();
+  var filtered = pipeline.frameRows.filter(function(r) {
+    if (shapeQ  && (r.shape||'').toLowerCase().indexOf(shapeQ) === -1) return false;
+    if (colourQ && r.colour !== colourQ) return false;
+    return true;
+  });
+  renderFrameTable(filtered);
+
+  var filteredProd = pipeline.productRows.filter(function(r) {
+    if (shapeQ && r.displayName.toLowerCase().indexOf(shapeQ) === -1 && r.master_sku.toLowerCase().indexOf(shapeQ) === -1) return false;
+    if (colourQ && r.frameColour !== colourQ) return false;
+    return true;
+  });
+  renderProductTable(filteredProd);
+}
+
+function clearFilters() {
+  document.getElementById('filterShape').value = '';
+  document.getElementById('filterColour').value = '';
+  activeShapeFilter = ''; activeColourFilter = '';
+  renderDashboard();
+}
+
+// ── EXPORT ────────────────────────────────────────
+function exportCSV() {
+  var pipeline = buildPipeline();
+  var rows = [['Shape','Size','Colour','Received','Coated','Raw Left','Coated Left']];
+  pipeline.frameRows.forEach(function(r) {
+    rows.push([r.shape, r.size, r.colour||'', r.received, r.coated||'', r.rawLeft, r.coatedLeft||'']);
+  });
+  rows.push([]);
+  rows.push(['Master SKU','Product','Packed','Dispatched','In Stock']);
+  pipeline.productRows.forEach(function(r) {
+    rows.push([r.master_sku, r.displayName, r.packed, r.dispatched, r.packed-r.dispatched]);
+  });
+  var csv = rows.map(function(r){ return r.map(function(v){ return '"'+String(v||'').replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+  var a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'inventorylens_' + new Date().toISOString().slice(0,10) + '.csv'; a.click();
+}
+
+// ── UTILS ─────────────────────────────────────────
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + (type||'');
+  setTimeout(function(){ t.classList.remove('show'); }, 2800);
+}
+
+</script>
+<script src="https://accounts.google.com/gsi/client" async></script>
+</body>
+</html>
