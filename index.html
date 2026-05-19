@@ -272,16 +272,15 @@ function setLoading(on) {
 
 // ── PIPELINE COMPUTATION ──────────────────────────
 
-// StockLens: aggregate received by shape+size+colour (frame colour)
+// StockLens: aggregate received by shape+size (no colour — colour assigned at coating)
 function computeReceived() {
   if (!slData || !slData.shipments) return {};
   var map = {};
   slData.shipments.forEach(function(s) {
     if (s.status === 'deleted') return;
     (s.lineItems||[]).forEach(function(l) {
-      // Chair (Eva) has no frame colour in StockLens — use shape only
-      var key = makeFrameKey(l.shape, l.size, null);
-      if (!map[key]) map[key] = { shape: l.shape, size: l.size, colour: null, received: 0 };
+      var key = (l.shape||'') + '|' + (l.size||'');
+      if (!map[key]) map[key] = { shape: l.shape, size: l.size, received: 0 };
       map[key].received += l.pieces;
     });
   });
@@ -295,8 +294,8 @@ function computeCoated() {
   clData.trolleys.forEach(function(t) {
     if (t.status === 'deleted') return;
     (t.lineItems||[]).forEach(function(l) {
-      var colour = l.colour || 'Unknown';
-      var key = makeFrameKey(l.shape, l.size, colour);
+      var colour = l.colour || null; // null = pre-colour-feature entries
+      var key = (l.shape||'') + '|' + (l.size||'') + '|' + (colour||'_');
       if (!map[key]) map[key] = { shape: l.shape, size: l.size, colour: colour, coated: 0 };
       map[key].coated += l.pieces;
     });
@@ -320,69 +319,94 @@ function computePacked() {
       mattressType: p.parsed ? p.parsed.mattressType : '',
       packed: 0, dispatched: 0,
     };
-    // dispatched counts as packed too
     if (p.status === 'packed' || p.status === 'dispatched') map[msku].packed++;
     if (p.status === 'dispatched') map[msku].dispatched++;
   });
   return map;
 }
 
-function makeFrameKey(shape, size, colour) {
-  return (shape||'') + '|' + (size||'') + (colour ? '|' + colour : '');
-}
-
 // Build combined pipeline
 function buildPipeline() {
-  var received = computeReceived();
-  var coated   = computeCoated();
-  var packed   = computePacked();
+  var received = computeReceived(); // keyed by shape|size
+  var coated   = computeCoated();   // keyed by shape|size|colour
+  var packed   = computePacked();   // keyed by master_sku
 
-  // Total summary numbers
+  // Totals
   var totalReceived   = Object.values(received).reduce(function(s,r){ return s+r.received; }, 0);
   var totalCoated     = Object.values(coated).reduce(function(s,r){ return s+r.coated; }, 0);
   var totalPacked     = Object.values(packed).reduce(function(s,r){ return s+r.packed; }, 0);
   var totalDispatched = Object.values(packed).reduce(function(s,r){ return s+r.dispatched; }, 0);
 
-  // Frame-level pipeline — merge received + coated keys
-  var frameKeys = new Set(Object.keys(received).concat(Object.keys(coated)));
-  var frameRows = [];
-  frameKeys.forEach(function(key) {
-    var r = received[key] || {};
-    var c = coated[key]   || {};
-    var shape   = r.shape  || c.shape  || '';
-    var size    = r.size   || c.size   || '';
-    var colour  = r.colour || c.colour || null;
-    var rec     = r.received || 0;
-    var coa     = c.coated   || 0;
-    var rawLeft    = rec - coa;
-    // coated left = coated - packed (at frame level, sum packed for this shape+size+colour)
-    var packedForFrame = 0;
-    Object.values(packed).forEach(function(pk) {
-      if (pk.shape === shape && pk.size === size) {
-        if (!colour || pk.frameColour === colour) packedForFrame += pk.packed;
-      }
-    });
-    var coatedLeft = coa - packedForFrame;
+  // Build frame rows — one row per shape+size+colour
+  // First collect all shape+size combos from received
+  // Then expand by colours found in coated
+  var shapeSize = {}; // shape|size -> { received, colours: {colour: coated} }
 
-    // Eva chair: skip coating stage
+  Object.values(received).forEach(function(r) {
+    var k = r.shape + '|' + r.size;
+    if (!shapeSize[k]) shapeSize[k] = { shape: r.shape, size: r.size, received: 0, colours: {} };
+    shapeSize[k].received += r.received;
+  });
+
+  Object.values(coated).forEach(function(c) {
+    var k = c.shape + '|' + c.size;
+    if (!shapeSize[k]) shapeSize[k] = { shape: c.shape, size: c.size, received: 0, colours: {} };
+    var col = c.colour || 'Unknown';
+    shapeSize[k].colours[col] = (shapeSize[k].colours[col] || 0) + c.coated;
+  });
+
+  var frameRows = [];
+
+  Object.values(shapeSize).forEach(function(ss) {
+    var shape = ss.shape;
+    var size  = ss.size;
+    var rec   = ss.received;
     var isChair = (shape === 'Eva' || size === 'Chair');
 
-    frameRows.push({
-      shape: shape, size: size, colour: colour,
-      received: rec, coated: isChair ? null : coa,
-      rawLeft: isChair ? (rec - packedForFrame) : rawLeft,
-      coatedLeft: isChair ? null : coatedLeft,
-      isChair: isChair,
-    });
+    var colours = Object.keys(ss.colours);
+
+    if (colours.length === 0) {
+      // Received but never coated
+      var packedForFrame = sumPackedForFrame(packed, shape, size, null);
+      frameRows.push({
+        shape: shape, size: size, colour: null,
+        received: rec, coated: isChair ? null : 0,
+        rawLeft: isChair ? (rec - packedForFrame) : rec,
+        coatedLeft: isChair ? null : -packedForFrame,
+        isChair: isChair,
+      });
+    } else {
+      // One row per colour
+      var totalCoatedForShape = colours.reduce(function(s,c){ return s + ss.colours[c]; }, 0);
+      colours.forEach(function(colour) {
+        var coa = ss.colours[colour];
+        var colourKey = colour === 'Unknown' ? null : colour;
+        var packedForFrame = sumPackedForFrame(packed, shape, size, colourKey);
+        // Distribute received proportionally across colours
+        var recShare = colours.length === 1 ? rec : Math.round(rec * coa / (totalCoatedForShape || 1));
+        var rawLeft    = recShare - coa;
+        var coatedLeft = coa - packedForFrame;
+        frameRows.push({
+          shape: shape, size: size,
+          colour: colour === 'Unknown' ? null : colour,
+          colourLabel: colour,
+          received: recShare, coated: isChair ? null : coa,
+          rawLeft: isChair ? null : rawLeft,
+          coatedLeft: isChair ? null : coatedLeft,
+          isChair: isChair,
+        });
+      });
+    }
   });
 
-  // Sort: chairs last, then by rawLeft desc
+  // Sort: chairs last, then by shape+size
   frameRows.sort(function(a,b) {
     if (a.isChair !== b.isChair) return a.isChair ? 1 : -1;
-    return b.rawLeft - a.rawLeft;
+    var shapeComp = (a.shape||'').localeCompare(b.shape||'');
+    if (shapeComp !== 0) return shapeComp;
+    return (a.size||'').localeCompare(b.size||'');
   });
 
-  // Product-level pipeline from PackLens
   var productRows = Object.values(packed).sort(function(a,b){ return b.packed - a.packed; });
 
   return {
@@ -390,6 +414,17 @@ function buildPipeline() {
     frameRows: frameRows,
     productRows: productRows,
   };
+}
+
+// Sum packed pieces for a shape+size+colour from PackLens
+function sumPackedForFrame(packed, shape, size, colour) {
+  var total = 0;
+  Object.values(packed).forEach(function(pk) {
+    if (pk.shape !== shape || pk.size !== size) return;
+    if (colour && pk.frameColour !== colour) return;
+    total += pk.packed;
+  });
+  return total;
 }
 
 // ── RENDER DASHBOARD ──────────────────────────────
@@ -456,7 +491,7 @@ function renderFrameTable(rows) {
       return '<tr>'
         + '<td><div class="ft-shape">' + (r.shape||'') + '</div></td>'
         + '<td>' + (r.size||'') + '</td>'
-        + '<td>' + (r.colour ? '<span class="colour-dot" style="background:' + colourHex(r.colour) + '"></span>' + r.colour : '<span style="color:var(--text3)">—</span>') + '</td>'
+        + '<td>' + (r.colourLabel && r.colourLabel !== 'Unknown' ? '<span class="colour-dot" style="background:' + colourHex(r.colourLabel) + '"></span>' + r.colourLabel : r.colour ? '<span class="colour-dot" style="background:' + colourHex(r.colour) + '"></span>' + r.colour : '<span style="color:var(--text3)">—</span>') + '</td>'
         + '<td class="num">' + r.received + '</td>'
         + '<td class="num">' + (r.coated !== null ? r.coated : '<span style="color:var(--text3)">—</span>') + '</td>'
         + '<td class="num ' + rawClass + '">' + r.rawLeft + '</td>'
