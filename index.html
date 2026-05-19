@@ -38,7 +38,15 @@ body{background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;min
 .pipeline-arrow{display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:18px;margin:0 -4px;}
 /* Stock position cards */
 .stock-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
-.stock-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px 10px;text-align:center;}
+.stock-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px 10px;text-align:center;transition:all 0.15s;}
+.stock-card.clickable{cursor:pointer;}
+.stock-card.clickable:hover{border-color:var(--accent);background:rgba(224,90,0,0.03);}
+.stock-card.active{border-color:var(--accent);box-shadow:0 2px 12px rgba(224,90,0,0.15);}
+.drill-hint{font-size:10px;color:var(--text3);margin-top:4px;font-weight:600;}
+.stock-card.active .drill-hint{color:var(--accent);}
+.drilldown-table-wrap{background:var(--surface);border:1.5px solid var(--accent);border-radius:var(--radius);overflow:auto;}
+.drilldown-title{font-size:13px;font-weight:800;color:var(--accent);padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.drilldown-close{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:0 4px;line-height:1;}
 .stock-card .val{font-size:24px;font-weight:800;}
 .stock-card .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-top:4px;color:var(--text2);}
 .stock-raw .val{color:#8e44ad;}
@@ -143,10 +151,20 @@ body{background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;min
     <!-- CURRENT STOCK -->
     <div class="section-title">Current Stock Position</div>
     <div class="stock-row">
-      <div class="stock-card stock-raw"><div class="val" id="cardRaw">—</div><div class="lbl">Raw</div></div>
-      <div class="stock-card stock-coated"><div class="val" id="cardCoatedStock">—</div><div class="lbl">Coated</div></div>
-      <div class="stock-card stock-finished"><div class="val" id="cardFinished">—</div><div class="lbl">Finished</div></div>
+      <div class="stock-card stock-raw clickable" onclick="toggleDrilldown('raw')">
+        <div class="val" id="cardRaw">—</div><div class="lbl">Raw</div>
+        <div class="drill-hint">tap to expand</div>
+      </div>
+      <div class="stock-card stock-coated clickable" onclick="toggleDrilldown('coated')">
+        <div class="val" id="cardCoatedStock">—</div><div class="lbl">Coated</div>
+        <div class="drill-hint">tap to expand</div>
+      </div>
+      <div class="stock-card stock-finished clickable" onclick="toggleDrilldown('finished')">
+        <div class="val" id="cardFinished">—</div><div class="lbl">Finished</div>
+        <div class="drill-hint">tap to expand</div>
+      </div>
     </div>
+    <div id="drilldownPanel" style="display:none;margin-bottom:16px;"></div>
 
     <!-- FRAME PIPELINE TABLE -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;margin-bottom:12px;">
@@ -622,6 +640,122 @@ function clearFilters() {
   document.getElementById('filterColour').value = '';
   activeShapeFilter = ''; activeColourFilter = '';
   renderDashboard();
+}
+
+// ── DRILLDOWN ─────────────────────────────────────
+var activeDrilldown = null;
+
+function toggleDrilldown(type) {
+  // Toggle off if same card clicked
+  if (activeDrilldown === type) {
+    activeDrilldown = null;
+    document.getElementById('drilldownPanel').style.display = 'none';
+    document.querySelectorAll('.stock-card').forEach(function(c){ c.classList.remove('active'); });
+    return;
+  }
+  activeDrilldown = type;
+  document.querySelectorAll('.stock-card').forEach(function(c){ c.classList.remove('active'); });
+  var cardMap = { raw: 0, coated: 1, finished: 2 };
+  var cards = document.querySelectorAll('.stock-card');
+  if (cards[cardMap[type]]) cards[cardMap[type]].classList.add('active');
+  renderDrilldown(type);
+}
+
+function renderDrilldown(type) {
+  var panel = document.getElementById('drilldownPanel');
+  panel.style.display = 'block';
+
+  var pipeline = buildPipeline();
+  var html = '';
+  var titles = { raw: 'Raw Stock Breakdown', coated: 'Coated Stock Breakdown', finished: 'Finished Stock Breakdown' };
+  var title = titles[type] || '';
+
+  if (type === 'raw') {
+    // Raw = received - coated, per shape+size+mattress
+    // Aggregate from frameRows
+    var rawMap = {};
+    pipeline.frameRows.forEach(function(r) {
+      if (r.isChair) return;
+      var k = (r.shape||'') + '|' + (r.size||'') + '|' + (r.mattress||'');
+      if (!rawMap[k]) rawMap[k] = { shape: r.shape, size: r.size, mattress: r.mattress, rawLeft: 0 };
+      if (r.rawLeft !== null) rawMap[k].rawLeft += r.rawLeft;
+    });
+    // Add chairs
+    pipeline.frameRows.forEach(function(r) {
+      if (!r.isChair) return;
+      var k = (r.shape||'') + '|Chair';
+      if (!rawMap[k]) rawMap[k] = { shape: r.shape, size: 'Chair', mattress: '—', rawLeft: 0 };
+      if (r.rawLeft !== null) rawMap[k].rawLeft += r.rawLeft;
+    });
+    var rows = Object.values(rawMap).filter(function(r){ return r.rawLeft > 0; });
+    rows.sort(function(a,b){ return b.rawLeft - a.rawLeft; });
+    var total = rows.reduce(function(s,r){ return s+r.rawLeft; }, 0);
+
+    html = buildDrillTable(title, total, 'pieces uncoated',
+      ['Shape','Size','Mattress','Raw Left'],
+      rows.map(function(r) {
+        return '<tr><td><div class="ft-shape">' + (r.shape||'') + '</div></td>'
+          + '<td>' + (r.size||'') + '</td>'
+          + '<td style="font-size:12px;color:var(--text2);">' + (r.mattress||'') + '</td>'
+          + '<td class="num pos">' + r.rawLeft + '</td></tr>';
+      })
+    );
+
+  } else if (type === 'coated') {
+    // Coated in hand = coated - packed, per shape+size+mattress+colour
+    var rows = pipeline.frameRows.filter(function(r){ return !r.isChair && r.coatedLeft !== null && r.coatedLeft > 0; });
+    rows.sort(function(a,b){ return b.coatedLeft - a.coatedLeft; });
+    var total = rows.reduce(function(s,r){ return s+r.coatedLeft; }, 0);
+
+    html = buildDrillTable(title, total, 'frames coated, awaiting packing',
+      ['Shape','Size','Mattress','Colour','Coated Left'],
+      rows.map(function(r) {
+        var colDot = r.colour
+          ? '<span class="colour-dot" style="background:' + colourHex(r.colour) + '"></span>' + r.colour
+          : '<span style="color:var(--text3)">—</span>';
+        return '<tr><td><div class="ft-shape">' + (r.shape||'') + '</div></td>'
+          + '<td>' + (r.size||'') + '</td>'
+          + '<td style="font-size:12px;color:var(--text2);">' + (r.mattress||'') + '</td>'
+          + '<td>' + colDot + '</td>'
+          + '<td class="num" style="color:var(--accent);">' + r.coatedLeft + '</td></tr>';
+      })
+    );
+
+  } else if (type === 'finished') {
+    // Finished = packed - dispatched, per master_sku
+    var rows = pipeline.productRows.filter(function(r){ return (r.packed - r.dispatched) > 0; });
+    rows.sort(function(a,b){ return (b.packed-b.dispatched) - (a.packed-a.dispatched); });
+    var total = rows.reduce(function(s,r){ return s+(r.packed-r.dispatched); }, 0);
+
+    html = buildDrillTable(title, total, 'packed, awaiting dispatch',
+      ['Product','Packed','Dispatched','In Stock'],
+      rows.map(function(r) {
+        var inStock = r.packed - r.dispatched;
+        return '<tr><td><div class="ft-shape">' + r.displayName + '</div>'
+          + '<div class="sku-cell">' + r.master_sku + '</div></td>'
+          + '<td class="num">' + r.packed + '</td>'
+          + '<td class="num">' + r.dispatched + '</td>'
+          + '<td class="num pos">' + inStock + '</td></tr>';
+      })
+    );
+  }
+
+  panel.innerHTML = html;
+}
+
+function buildDrillTable(title, total, subtitle, headers, rowsHTML) {
+  var headerCells = headers.map(function(h, i) {
+    return '<th' + (i === headers.length-1 || i > 0 ? ' class="num"' : '') + '>' + h + '</th>';
+  }).join('');
+  return '<div class="drilldown-table-wrap">'
+    + '<div class="drilldown-title">'
+    + '<span>' + title + ' &mdash; <strong>' + total + '</strong> ' + subtitle + '</span>'
+    + '<button class="drilldown-close" onclick="toggleDrilldown(activeDrilldown)">&times;</button>'
+    + '</div>'
+    + '<div style="overflow:auto;">'
+    + '<table class="inv-table"><thead><tr>' + headerCells + '</tr></thead>'
+    + '<tbody>' + (rowsHTML.length > 0 ? rowsHTML.join('') : '<tr><td colspan="' + headers.length + '" style="text-align:center;color:var(--text3);padding:20px;">Nothing here</td></tr>') + '</tbody>'
+    + '</table></div></div>';
 }
 
 // ── EXPORT ────────────────────────────────────────
