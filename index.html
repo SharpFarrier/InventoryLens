@@ -100,6 +100,17 @@ body{background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;min
 .drilldown-title{font-size:13px;font-weight:800;color:var(--accent);padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
 .drilldown-close{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;}
 /* Opening stock */
+.os-type-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0 20px;}
+.os-type-card{background:var(--surface);border:2.5px solid var(--border);border-radius:var(--radius);padding:20px 16px;text-align:center;cursor:pointer;transition:all 0.15s;}
+.os-type-card:hover{border-color:var(--accent);}
+.os-type-card.selected{border-color:var(--accent);background:rgba(224,90,0,0.05);}
+.os-type-icon{font-size:28px;margin-bottom:8px;}
+.os-type-label{font-size:15px;font-weight:800;color:var(--text);}
+.os-type-card.selected .os-type-label{color:var(--accent);}
+.os-type-sub{font-size:12px;color:var(--text3);margin-top:4px;line-height:1.4;}
+.os-type-banner{padding:10px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;margin-bottom:16px;}
+.os-type-banner.raw{background:rgba(142,68,173,0.08);border:1.5px solid rgba(142,68,173,0.25);color:#8e44ad;}
+.os-type-banner.coated{background:rgba(224,90,0,0.08);border:1.5px solid rgba(224,90,0,0.25);color:var(--accent);}
 .os-cat-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
 .os-cat-pill{padding:10px 18px;border-radius:20px;border:2px solid var(--border);background:var(--surface);color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;}
 .os-cat-pill.selected{border-color:var(--accent);background:rgba(224,90,0,0.08);color:var(--accent);}
@@ -237,68 +248,78 @@ select:focus,input:focus,textarea:focus{border-color:var(--accent);}
 
   <!-- OPENING STOCK PAGE -->
   <div id="page-opening" class="page">
-    <div class="section-title" style="margin-top:16px;">Add Opening Stock</div>
-    <div style="font-size:13px;color:var(--text3);margin-bottom:16px;line-height:1.6;">
-      Enter the stock you had before these apps went live. Each entry adds to both received and coated totals so your pipeline numbers are accurate.
-    </div>
 
-    <div class="os-form-group">
-      <div class="os-form-label">Category</div>
-      <div class="os-cat-row">
-        <button class="os-cat-pill" onclick="selectOpeningCategory(this,'bed')">&#128709; Bed</button>
-        <button class="os-cat-pill" onclick="selectOpeningCategory(this,'table')">&#129681; Table</button>
-        <button class="os-cat-pill" onclick="selectOpeningCategory(this,'chair')">&#128186; Chair</button>
+    <!-- Entry type selector -->
+    <div class="os-type-row">
+      <div class="os-type-card" id="osTypeRaw" onclick="selectEntryType('raw')">
+        <div class="os-type-icon" style="color:#8e44ad;">&#9632;</div>
+        <div class="os-type-label">Raw Stock</div>
+        <div class="os-type-sub">Uncoated frames in warehouse</div>
+      </div>
+      <div class="os-type-card" id="osTypeCoated" onclick="selectEntryType('coated')">
+        <div class="os-type-icon" style="color:var(--accent);">&#9632;</div>
+        <div class="os-type-label">Coated Stock</div>
+        <div class="os-type-sub">Frames already powder coated</div>
       </div>
     </div>
 
-    <div id="osShapeRow" style="display:none">
+    <!-- Form — shown after type selected -->
+    <div id="osForm" style="display:none">
+      <div class="os-type-banner" id="osTypeBanner"></div>
+
       <div class="os-form-group">
-        <div class="os-form-label">Shape</div>
-        <select id="osShape"><option value="">Select shape</option></select>
-      </div>
-
-      <div id="osSizeGroup" style="display:none" class="os-form-group">
-        <div class="os-form-label">Size</div>
-        <select id="osSize">
-          <option value="">Select size</option>
-          <option>Single 2.5ft</option><option>Single 3ft</option>
-          <option>Double 4ft</option><option>Queen 5ft</option><option>King 6ft</option>
-        </select>
-      </div>
-
-      <div id="osMattressGroup" style="display:none" class="os-form-group">
-        <div class="os-form-label">Mattress</div>
-        <select id="osMattress">
-          <option value="">Select mattress</option>
-          <option>With Mattress</option><option>Without Mattress</option>
-        </select>
-      </div>
-
-      <div id="osColourGroup" style="display:none" class="os-form-group">
-        <div class="os-form-label">Frame Colour <span style="font-size:10px;font-weight:500;color:var(--text3);">(for coated stock only)</span></div>
-        <select id="osColour">
-          <option value="">Not coated / Unknown</option>
-          <option>Black</option><option>White</option><option>Golden</option><option>Ivory</option>
-        </select>
-      </div>
-
-      <div class="os-form-grid" style="margin-bottom:14px;">
-        <div class="os-form-group" style="margin-bottom:0;">
-          <div class="os-form-label">Raw Pieces</div>
-          <input type="number" id="osRawPieces" placeholder="0" min="0" inputmode="numeric">
-        </div>
-        <div class="os-form-group" style="margin-bottom:0;">
-          <div class="os-form-label">Coated Pieces</div>
-          <input type="number" id="osCoatedPieces" placeholder="0" min="0" inputmode="numeric">
+        <div class="os-form-label">Category</div>
+        <div class="os-cat-row">
+          <button class="os-cat-pill" onclick="selectOpeningCategory(this,'bed')">&#128709; Bed</button>
+          <button class="os-cat-pill" onclick="selectOpeningCategory(this,'table')">&#129681; Table</button>
+          <button class="os-cat-pill" onclick="selectOpeningCategory(this,'chair')">&#128186; Chair</button>
         </div>
       </div>
 
-      <div class="os-form-group">
-        <div class="os-form-label">Notes <span style="font-size:10px;font-weight:500;color:var(--text3);">(optional)</span></div>
-        <input type="text" id="osNotes" placeholder="e.g. Stock count as of May 19">
-      </div>
+      <div id="osShapeRow" style="display:none">
+        <div class="os-form-group">
+          <div class="os-form-label">Shape</div>
+          <select id="osShape"><option value="">Select shape</option></select>
+        </div>
 
-      <button class="btn-primary" id="osSubmitBtn" onclick="submitOpeningEntry()">Add Entry</button>
+        <div id="osSizeGroup" style="display:none" class="os-form-group">
+          <div class="os-form-label">Size</div>
+          <select id="osSize">
+            <option value="">Select size</option>
+            <option>Single 2.5ft</option><option>Single 3ft</option>
+            <option>Double 4ft</option><option>Queen 5ft</option><option>King 6ft</option>
+          </select>
+        </div>
+
+        <div id="osMattressGroup" style="display:none" class="os-form-group">
+          <div class="os-form-label">Mattress</div>
+          <select id="osMattress">
+            <option value="">Select mattress</option>
+            <option>With Mattress</option><option>Without Mattress</option>
+          </select>
+        </div>
+
+        <!-- Colour — only for coated type -->
+        <div id="osColourGroup" style="display:none" class="os-form-group">
+          <div class="os-form-label">Frame Colour</div>
+          <select id="osColour">
+            <option value="">Select colour</option>
+            <option>Black</option><option>White</option><option>Golden</option><option>Ivory</option>
+          </select>
+        </div>
+
+        <div class="os-form-group">
+          <div class="os-form-label" id="osPiecesLabel">Pieces</div>
+          <input type="number" id="osPieces" placeholder="Enter number of pieces" min="1" inputmode="numeric">
+        </div>
+
+        <div class="os-form-group">
+          <div class="os-form-label">Notes <span style="font-size:10px;font-weight:500;color:var(--text3);">(optional)</span></div>
+          <input type="text" id="osNotes" placeholder="e.g. Stock count as of May 26">
+        </div>
+
+        <button class="btn-primary" id="osSubmitBtn" onclick="submitOpeningEntry()">Add Entry</button>
+      </div>
     </div>
 
     <div class="section-title" style="margin-top:28px;">Opening Stock Log</div>
@@ -446,6 +467,32 @@ async function saveOpeningStock() {
 
 // ── OPENING STOCK ENTRY ───────────────────────────
 var openingDraftCategory = null;
+var openingEntryType = null; // 'raw' or 'coated'
+
+function selectEntryType(type) {
+  openingEntryType = type;
+  document.querySelectorAll('.os-type-card').forEach(function(c){ c.classList.remove('selected'); });
+  document.getElementById(type === 'raw' ? 'osTypeRaw' : 'osTypeCoated').classList.add('selected');
+  // Show form
+  document.getElementById('osForm').style.display = 'block';
+  // Banner
+  var banner = document.getElementById('osTypeBanner');
+  if (type === 'raw') {
+    banner.className = 'os-type-banner raw';
+    banner.textContent = '⬜ Raw Stock — frames received but not yet coated. No colour needed.';
+  } else {
+    banner.className = 'os-type-banner coated';
+    banner.textContent = '🎨 Coated Stock — frames already powder coated. Colour required.';
+  }
+  // Show/hide colour based on type
+  var colourGroup = document.getElementById('osColourGroup');
+  if (colourGroup) colourGroup.style.display = type === 'coated' ? 'block' : 'none';
+  // Update pieces label
+  var lbl = document.getElementById('osPiecesLabel');
+  if (lbl) lbl.textContent = type === 'raw' ? 'Raw Pieces' : 'Coated Pieces';
+  // Reset form fields
+  resetOpeningFormFields();
+}
 
 function selectOpeningCategory(el, catId) {
   openingDraftCategory = catId;
@@ -455,8 +502,9 @@ function selectOpeningCategory(el, catId) {
   document.getElementById('osShapeRow').style.display = 'block';
   document.getElementById('osSizeGroup').style.display = isBed ? 'block' : 'none';
   document.getElementById('osMattressGroup').style.display = isBed ? 'block' : 'none';
-  document.getElementById('osColourGroup').style.display = catId !== 'chair' ? 'block' : 'none';
-  // Populate shape options
+  // Colour only for coated type and non-chair
+  var colourGroup = document.getElementById('osColourGroup');
+  if (colourGroup) colourGroup.style.display = (openingEntryType === 'coated' && catId !== 'chair') ? 'block' : 'none';
   var shapes = {
     bed:   ['Round','Square','Metal','Headboard','Element','Trolley','Oslo','Golden','Nesto','LG','Wooden','Base'],
     table: ['Duke','Lizon'],
@@ -468,24 +516,29 @@ function selectOpeningCategory(el, catId) {
 }
 
 async function submitOpeningEntry() {
+  if (!openingEntryType) { showToast('Select Raw or Coated stock type', 'error'); return; }
   var category = openingDraftCategory;
   var shape    = document.getElementById('osShape').value;
   var size     = category === 'bed' ? document.getElementById('osSize').value : (category === 'table' ? 'Table' : 'Chair');
   var mattress = category === 'bed' ? document.getElementById('osMattress').value : 'Without Mattress';
-  var colour   = category !== 'chair' ? document.getElementById('osColour').value : null;
-  var rawPcs   = parseInt(document.getElementById('osRawPieces').value) || 0;
-  var coatedPcs= category !== 'chair' ? (parseInt(document.getElementById('osCoatedPieces').value) || 0) : 0;
+  var colour   = (openingEntryType === 'coated' && category !== 'chair') ? document.getElementById('osColour').value : null;
+  var pieces   = parseInt(document.getElementById('osPieces').value) || 0;
   var notes    = document.getElementById('osNotes').value.trim();
 
   if (!category) { showToast('Select a category', 'error'); return; }
   if (!shape)    { showToast('Select a shape', 'error'); return; }
   if (category === 'bed' && !size) { showToast('Select a size', 'error'); return; }
   if (category === 'bed' && !mattress) { showToast('Select mattress type', 'error'); return; }
-  if (rawPcs === 0 && coatedPcs === 0) { showToast('Enter at least one piece count', 'error'); return; }
+  if (openingEntryType === 'coated' && !colour && category !== 'chair') { showToast('Select a frame colour', 'error'); return; }
+  if (pieces < 1) { showToast('Enter piece count', 'error'); return; }
+
+  var rawPcs    = openingEntryType === 'raw'    ? pieces : 0;
+  var coatedPcs = openingEntryType === 'coated' ? pieces : 0;
 
   var entry = {
     id: 'OS' + Date.now(),
     date: new Date().toISOString(),
+    entryType: openingEntryType,
     category: category,
     shape: shape,
     size: size,
@@ -515,14 +568,23 @@ async function submitOpeningEntry() {
 }
 
 function resetOpeningForm() {
+  openingEntryType = null;
+  openingDraftCategory = null;
+  document.querySelectorAll('.os-type-card').forEach(function(c){ c.classList.remove('selected'); });
+  document.getElementById('osForm').style.display = 'none';
+  resetOpeningFormFields();
+}
+
+function resetOpeningFormFields() {
   openingDraftCategory = null;
   document.querySelectorAll('.os-cat-pill').forEach(function(p){ p.classList.remove('selected'); });
   ['osShape','osSize','osMattress','osColour'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.value = '';
   });
-  ['osRawPieces','osCoatedPieces','osNotes'].forEach(function(id){
-    var el = document.getElementById(id); if (el) el.value = '';
-  });
+  var piecesEl = document.getElementById('osPieces');
+  if (piecesEl) piecesEl.value = '';
+  var notesEl = document.getElementById('osNotes');
+  if (notesEl) notesEl.value = '';
   document.getElementById('osShapeRow').style.display = 'none';
   document.getElementById('osSizeGroup').style.display = 'none';
   document.getElementById('osMattressGroup').style.display = 'none';
@@ -550,9 +612,12 @@ function renderOpeningLog() {
   }
   el.innerHTML = entries.map(function(e) {
     var dt = new Date(e.date).toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    var typeBadge = e.entryType === 'coated'
+      ? '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(224,90,0,0.1);color:var(--accent);margin-left:6px;">Coated</span>'
+      : '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(142,68,173,0.1);color:#8e44ad;margin-left:6px;">Raw</span>';
     return '<div class="os-log-card">'
       + '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
-      + '<div><div style="font-size:14px;font-weight:700;color:var(--text);">' + e.shape + (e.size && e.size !== 'Table' && e.size !== 'Chair' ? ' • ' + e.size : '') + '</div>'
+      + '<div><div style="font-size:14px;font-weight:700;color:var(--text);">' + e.shape + (e.size && e.size !== 'Table' && e.size !== 'Chair' ? ' • ' + e.size : '') + typeBadge + '</div>'
       + '<div style="font-size:12px;color:var(--text2);margin-top:2px;">' + e.mattress + (e.colour ? ' • ' + e.colour : '') + '</div>'
       + '<div style="font-size:11px;color:var(--text3);margin-top:2px;">' + dt + '</div></div>'
       + (isOwner ? '<button onclick="deleteOpeningEntry(\'' + e.id + '\')" style="background:none;border:none;color:var(--danger);font-size:18px;cursor:pointer;">×</button>' : '')
