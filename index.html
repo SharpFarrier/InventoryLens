@@ -19,90 +19,113 @@ body{background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;min
 .header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
 .header-logo{display:flex;align-items:center;gap:8px;}
 .header-logo .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;}
-.header-logo span{font-size:20px;font-weight:800;letter-spacing:-0.5px;}
+.header-logo span{font-size:18px;font-weight:800;letter-spacing:-0.5px;}
 .header-logo span em{color:var(--accent);font-style:normal;}
-.header-right{display:flex;align-items:center;gap:10px;}
+.header-right{display:flex;align-items:center;gap:8px;}
 .last-refresh{font-size:11px;color:var(--text3);font-weight:600;}
+.nav-tabs{display:flex;gap:4px;}
+.nav-tab{padding:8px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text2);font-family:inherit;transition:all 0.2s;}
+.nav-tab.active{background:var(--accent);color:#fff;font-weight:700;}
 .btn-refresh{padding:8px 14px;background:var(--accent);color:#fff;font-size:13px;font-weight:700;border:none;border-radius:20px;cursor:pointer;font-family:inherit;}
 .btn-refresh:disabled{opacity:0.5;}
 .loading-bar{height:3px;background:var(--accent);display:none;animation:loadpulse 1s ease infinite;}
 @keyframes loadpulse{0%,100%{opacity:0.4;}50%{opacity:1;}}
-.main{padding:16px;padding-bottom:80px;}
+.page{display:none;padding:16px;padding-bottom:80px;}
+.page.active{display:block;}
 .section-title{font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);margin:24px 0 12px;}
 .section-title:first-child{margin-top:0;}
-/* Pipeline summary */
-.pipeline-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px;}
-.pipeline-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px 10px;text-align:center;position:relative;}
-.pipeline-card .val{font-size:26px;font-weight:800;color:var(--accent);}
+/* Pipeline cards */
+.pipeline-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+.pipeline-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px 10px;text-align:center;}
+.pipeline-card .val{font-size:24px;font-weight:800;color:var(--accent);}
 .pipeline-card .lbl{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.8px;margin-top:4px;}
-.pipeline-arrow{display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:18px;margin:0 -4px;}
-/* Stock position cards */
-.stock-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
-.stock-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px 10px;text-align:center;transition:all 0.15s;}
-.stock-card.clickable{cursor:pointer;}
-.stock-card.clickable:hover{border-color:var(--accent);background:rgba(224,90,0,0.03);}
-.stock-card.active{border-color:var(--accent);box-shadow:0 2px 12px rgba(224,90,0,0.15);}
-.drill-hint{font-size:10px;color:var(--text3);margin-top:4px;font-weight:600;}
+/* Stock position */
+.stock-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px;}
+.stock-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:16px 12px;text-align:center;cursor:pointer;transition:all 0.15s;user-select:none;}
+.stock-card:hover{border-color:var(--accent);}
+.stock-card.active{border-color:var(--accent);box-shadow:0 3px 16px rgba(224,90,0,0.15);}
+.stock-card .val{font-size:32px;font-weight:800;}
+.stock-card .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-top:4px;color:var(--text2);}
+.stock-card .drill-hint{font-size:10px;color:var(--text3);margin-top:6px;}
 .stock-card.active .drill-hint{color:var(--accent);}
-.drilldown-table-wrap{background:var(--surface);border:1.5px solid var(--accent);border-radius:var(--radius);overflow:auto;}
-.drilldown-title{font-size:13px;font-weight:800;color:var(--accent);padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.drilldown-close{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:0 4px;line-height:1;}
-.stock-card .val{font-size:24px;font-weight:800;}
-.stock-card .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-top:4px;color:var(--text2);}
 .stock-raw .val{color:#8e44ad;}
 .stock-coated .val{color:var(--accent);}
 .stock-finished .val{color:var(--success);}
+/* Opening stock badge */
+.os-badge-row{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:16px;}
+.os-badge-label{font-size:13px;font-weight:700;color:var(--text);}
 /* Alerts */
 .alert{padding:12px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;margin-bottom:8px;}
 .alert-danger{background:rgba(192,57,43,0.08);border:1.5px solid rgba(192,57,43,0.3);color:var(--danger);}
 .alert-warning{background:rgba(243,156,18,0.08);border:1.5px solid rgba(243,156,18,0.3);color:#e67e22;}
 /* Source cards */
-.source-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.source-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;}
 .source-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;}
-.source-ok{border-color:rgba(30,132,73,0.3);}
-.source-err{border-color:rgba(192,57,43,0.3);}
+.source-ok{border-left:3px solid var(--success);}
+.source-err{border-left:3px solid var(--danger);}
 .source-name{font-size:13px;font-weight:800;color:var(--text);}
 .source-file{font-size:10px;color:var(--text3);font-family:monospace;margin-top:2px;}
 .source-stat{font-size:12px;font-weight:700;color:var(--success);margin-top:6px;}
 .source-time{font-size:11px;color:var(--text3);margin-top:2px;}
 .source-missing{color:var(--danger)!important;}
-/* Filter bar */
+/* Filter */
 .filter-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
-.filter-input{flex:1;min-width:120px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;padding:10px 12px;outline:none;font-family:inherit;}
+.filter-input{flex:1;min-width:100px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;padding:10px 12px;outline:none;font-family:inherit;}
 .filter-input:focus{border-color:var(--accent);}
-.filter-select{flex:1;min-width:120px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;padding:10px 12px;outline:none;font-family:inherit;-webkit-appearance:none;cursor:pointer;}
+.filter-select{flex:1;min-width:100px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;padding:10px 12px;outline:none;font-family:inherit;-webkit-appearance:none;cursor:pointer;}
 .filter-select:focus{border-color:var(--accent);}
-.btn-clear-filter{padding:10px 14px;background:var(--surface2);color:var(--text2);font-size:13px;font-weight:700;border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;white-space:nowrap;}
+.btn-clear-filter{padding:10px 12px;background:var(--surface2);color:var(--text2);font-size:13px;font-weight:700;border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;}
 /* Tables */
-.table-wrap{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);overflow:auto;margin-bottom:8px;}
-.inv-table{width:100%;border-collapse:collapse;min-width:500px;}
-.inv-table th{font-size:11px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:0.8px;padding:10px 12px;text-align:left;border-bottom:1.5px solid var(--border);background:var(--surface2);white-space:nowrap;}
-.inv-table th.num{text-align:right;}
+.table-wrap{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:8px;}
+.inv-table{width:100%;border-collapse:collapse;min-width:480px;}
+.inv-table th{font-size:11px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:0.8px;padding:10px 12px;text-align:left;border-bottom:1.5px solid var(--border);background:var(--surface2);}
+.inv-table th.num,.inv-table td.num{text-align:right;}
 .inv-table td{font-size:13px;color:var(--text);padding:10px 12px;border-bottom:1px solid var(--border);}
-.inv-table td.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;}
+.inv-table tr.group-row{background:var(--surface);}
+.inv-table tr.group-row:hover td{background:var(--surface2);}
+.inv-table tr.colour-row td{background:rgba(224,90,0,0.02);}
+.inv-table tr.colour-row:hover td{background:rgba(224,90,0,0.05);}
 .inv-table tr:last-child td{border-bottom:none;}
-.inv-table tr:hover td{background:var(--surface2);}
-.inv-table .pos{color:var(--success);}
+.inv-table .pos{color:var(--success);font-weight:800;}
 .inv-table .zero{color:var(--text3);}
 .inv-table .neg{color:var(--danger);font-weight:800;}
+.inv-table .rec-col{color:var(--text);}
+.inv-table .coa-col{color:var(--accent);}
 .ft-shape{font-weight:700;color:var(--text);}
 .sku-cell{font-size:11px;color:var(--text3);font-family:monospace;margin-top:2px;}
-.section-divider td{background:var(--surface2)!important;font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:1px;padding:8px 12px!important;border-top:1.5px solid var(--border);}
+.mattress-tag{font-size:11px;font-weight:600;color:var(--text2);background:var(--surface2);padding:2px 7px;border-radius:6px;}
 .colour-dot{display:inline-block;width:10px;height:10px;border-radius:50%;border:1px solid var(--border);margin-right:5px;vertical-align:middle;}
+/* Drilldown */
+.drilldown-table-wrap{background:var(--surface);border:2px solid var(--accent);border-radius:var(--radius);overflow:hidden;}
+.drilldown-title{font-size:13px;font-weight:800;color:var(--accent);padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.drilldown-close{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;}
+/* Opening stock */
+.os-cat-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.os-cat-pill{padding:10px 18px;border-radius:20px;border:2px solid var(--border);background:var(--surface);color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;}
+.os-cat-pill.selected{border-color:var(--accent);background:rgba(224,90,0,0.08);color:var(--accent);}
+.os-form-group{margin-bottom:14px;}
+.os-form-label{font-size:11px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;}
+.os-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.os-log-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:8px;}
+select,input[type="text"],input[type="number"],textarea{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:15px;padding:12px 14px;outline:none;font-family:inherit;transition:border-color 0.15s;-webkit-appearance:none;}
+select:focus,input:focus,textarea:focus{border-color:var(--accent);}
+.btn-primary{width:100%;padding:16px;background:var(--accent);color:#fff;font-size:16px;font-weight:800;border:none;border-radius:var(--radius);cursor:pointer;font-family:inherit;margin-top:8px;}
+.btn-export{padding:9px 16px;background:var(--surface2);color:var(--text2);font-size:12px;font-weight:700;border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;}
 /* Auth */
 .auth-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 20px;text-align:center;background:var(--bg);}
-.auth-logo{font-size:44px;font-weight:800;letter-spacing:-1px;margin-bottom:10px;}
+.auth-logo{font-size:40px;font-weight:800;letter-spacing:-1px;margin-bottom:10px;}
 .auth-logo em{color:var(--accent);font-style:normal;}
 .auth-sub{font-size:16px;color:var(--text2);margin-bottom:48px;line-height:1.7;font-weight:500;}
 .btn-google{display:flex;align-items:center;gap:10px;padding:14px 24px;background:white;color:#333;font-size:15px;font-weight:600;border:none;border-radius:var(--radius);cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+.empty-state{text-align:center;padding:48px 20px;color:var(--text3);}
+.empty-state .icon{font-size:40px;margin-bottom:12px;}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:12px 20px;font-size:13px;font-weight:600;z-index:300;transition:transform 0.3s;white-space:nowrap;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,0.1);}
 .toast.show{transform:translateX(-50%) translateY(0);}
+.toast.success{border-color:var(--success);color:var(--success);}
 .toast.error{border-color:var(--danger);color:var(--danger);}
-.btn-export{padding:9px 16px;background:var(--surface2);color:var(--text2);font-size:12px;font-weight:700;border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;}
-@media(max-width:480px){
-  .pipeline-row{grid-template-columns:repeat(2,1fr);}
-  .pipeline-arrow{display:none;}
-}
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;display:inline-block;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg);}}
+@media(max-width:480px){.pipeline-row{grid-template-columns:repeat(2,1fr);}.source-row{grid-template-columns:1fr 1fr;}}
 </style>
 </head>
 <body>
@@ -119,27 +142,30 @@ body{background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;min
 <div id="app" style="display:none">
   <div class="header">
     <div class="header-logo"><div class="dot"></div><span>Inventory<em>Lens</em></span></div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="dashTab" onclick="showPage('dashboard',this)">Dashboard</button>
+      <button class="nav-tab" id="openingStockTab" style="display:none" onclick="showPage('opening',this)">Opening Stock</button>
+    </div>
     <div class="header-right">
       <span class="last-refresh" id="lastRefreshLabel"></span>
-      <button class="btn-refresh" id="refreshBtn" onclick="refreshAll()">&#8635; Refresh</button>
+      <button class="btn-refresh" id="refreshBtn" onclick="refreshAll()">&#8635;</button>
     </div>
   </div>
   <div class="loading-bar" id="loadingBar"></div>
 
-  <div class="main">
+  <!-- DASHBOARD PAGE -->
+  <div id="page-dashboard" class="page active">
 
-    <!-- DATA SOURCES -->
-    <div class="section-title">Data Sources</div>
-    <div class="source-row" id="sourceStatus">
-      <div class="source-card"><div class="source-name">StockLens</div><div class="source-stat source-missing">Loading...</div></div>
-      <div class="source-card"><div class="source-name">CoatingLens</div><div class="source-stat source-missing">Loading...</div></div>
-      <div class="source-card"><div class="source-name">PackLens</div><div class="source-stat source-missing">Loading...</div></div>
+    <!-- Opening stock status -->
+    <div class="os-badge-row" style="margin-top:16px;">
+      <div class="os-badge-label">Opening Stock</div>
+      <span id="openingStockBadge" style="font-size:13px;font-weight:700;">Loading...</span>
     </div>
 
-    <!-- ALERTS -->
+    <!-- Alerts -->
     <div id="alertsBlock" style="display:none;margin-bottom:16px;"></div>
 
-    <!-- PIPELINE TOTALS -->
+    <!-- Pipeline totals -->
     <div class="section-title">Pipeline Totals</div>
     <div class="pipeline-row">
       <div class="pipeline-card"><div class="val" id="cardReceived">—</div><div class="lbl">Received</div></div>
@@ -148,26 +174,30 @@ body{background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;min
       <div class="pipeline-card"><div class="val" id="cardDispatched">—</div><div class="lbl">Dispatched</div></div>
     </div>
 
-    <!-- CURRENT STOCK -->
-    <div class="section-title">Current Stock Position</div>
+    <!-- Current stock -->
+    <div class="section-title">Current Stock <span style="font-size:10px;font-weight:600;color:var(--text3);">(tap a card for breakdown)</span></div>
     <div class="stock-row">
-      <div class="stock-card stock-raw clickable" onclick="toggleDrilldown('raw')">
+      <div class="stock-card stock-raw" onclick="toggleDrilldown('raw')">
         <div class="val" id="cardRaw">—</div><div class="lbl">Raw</div>
         <div class="drill-hint">tap to expand</div>
       </div>
-      <div class="stock-card stock-coated clickable" onclick="toggleDrilldown('coated')">
+      <div class="stock-card stock-coated" onclick="toggleDrilldown('coated')">
         <div class="val" id="cardCoatedStock">—</div><div class="lbl">Coated</div>
         <div class="drill-hint">tap to expand</div>
       </div>
-      <div class="stock-card stock-finished clickable" onclick="toggleDrilldown('finished')">
+      <div class="stock-card stock-finished" onclick="toggleDrilldown('finished')">
         <div class="val" id="cardFinished">—</div><div class="lbl">Finished</div>
         <div class="drill-hint">tap to expand</div>
       </div>
     </div>
     <div id="drilldownPanel" style="display:none;margin-bottom:16px;"></div>
 
-    <!-- FRAME PIPELINE TABLE -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;margin-bottom:12px;">
+    <!-- Data sources -->
+    <div class="section-title">Data Sources</div>
+    <div class="source-row" id="sourceStatus"></div>
+
+    <!-- Frame pipeline -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;margin-bottom:12px;">
       <div class="section-title" style="margin:0;">Frame Pipeline</div>
       <button class="btn-export" onclick="exportCSV()">Export CSV</button>
     </div>
@@ -179,29 +209,100 @@ body{background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;min
       </select>
       <button class="btn-clear-filter" onclick="clearFilters()">Clear</button>
     </div>
-    <div class="table-wrap">
+    <div style="overflow:auto;" class="table-wrap">
       <table class="inv-table">
         <thead><tr>
-          <th>Shape</th><th>Size</th><th>Mattress</th><th>Colour</th>
-          <th class="num">Received</th><th class="num">Coated</th>
-          <th class="num">Raw Left</th><th class="num">Coated Left</th>
+          <th>Shape</th><th>Size</th><th>Mattress</th>
+          <th class="num rec-col">Received</th>
+          <th class="num coa-col">Coated</th>
+          <th class="num">Raw Left</th>
+          <th class="num">Coated Left</th>
         </tr></thead>
-        <tbody id="frameTableBody"><tr><td colspan="8" style="text-align:center;color:var(--text3);padding:24px;">Sign in to load data</td></tr></tbody>
+        <tbody id="frameTableBody"></tbody>
       </table>
     </div>
 
-    <!-- PRODUCT PIPELINE TABLE -->
-    <div class="section-title" style="margin-top:24px;">Product Pipeline (Packed &amp; Dispatched)</div>
-    <div class="table-wrap">
+    <!-- Product pipeline -->
+    <div class="section-title" style="margin-top:20px;">Product Pipeline</div>
+    <div style="overflow:auto;" class="table-wrap">
       <table class="inv-table">
         <thead><tr>
           <th>Product</th>
           <th class="num">Packed</th><th class="num">Dispatched</th><th class="num">In Stock</th>
         </tr></thead>
-        <tbody id="productTableBody"><tr><td colspan="4" style="text-align:center;color:var(--text3);padding:24px;">Sign in to load data</td></tr></tbody>
+        <tbody id="productTableBody"></tbody>
       </table>
     </div>
+  </div>
 
+  <!-- OPENING STOCK PAGE -->
+  <div id="page-opening" class="page">
+    <div class="section-title" style="margin-top:16px;">Add Opening Stock</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:16px;line-height:1.6;">
+      Enter the stock you had before these apps went live. Each entry adds to both received and coated totals so your pipeline numbers are accurate.
+    </div>
+
+    <div class="os-form-group">
+      <div class="os-form-label">Category</div>
+      <div class="os-cat-row">
+        <button class="os-cat-pill" onclick="selectOpeningCategory(this,'bed')">&#128709; Bed</button>
+        <button class="os-cat-pill" onclick="selectOpeningCategory(this,'table')">&#129681; Table</button>
+        <button class="os-cat-pill" onclick="selectOpeningCategory(this,'chair')">&#128186; Chair</button>
+      </div>
+    </div>
+
+    <div id="osShapeRow" style="display:none">
+      <div class="os-form-group">
+        <div class="os-form-label">Shape</div>
+        <select id="osShape"><option value="">Select shape</option></select>
+      </div>
+
+      <div id="osSizeGroup" style="display:none" class="os-form-group">
+        <div class="os-form-label">Size</div>
+        <select id="osSize">
+          <option value="">Select size</option>
+          <option>Single 2.5ft</option><option>Single 3ft</option>
+          <option>Double 4ft</option><option>Queen 5ft</option><option>King 6ft</option>
+        </select>
+      </div>
+
+      <div id="osMattressGroup" style="display:none" class="os-form-group">
+        <div class="os-form-label">Mattress</div>
+        <select id="osMattress">
+          <option value="">Select mattress</option>
+          <option>With Mattress</option><option>Without Mattress</option>
+        </select>
+      </div>
+
+      <div id="osColourGroup" style="display:none" class="os-form-group">
+        <div class="os-form-label">Frame Colour <span style="font-size:10px;font-weight:500;color:var(--text3);">(for coated stock only)</span></div>
+        <select id="osColour">
+          <option value="">Not coated / Unknown</option>
+          <option>Black</option><option>White</option><option>Golden</option><option>Ivory</option>
+        </select>
+      </div>
+
+      <div class="os-form-grid" style="margin-bottom:14px;">
+        <div class="os-form-group" style="margin-bottom:0;">
+          <div class="os-form-label">Raw Pieces</div>
+          <input type="number" id="osRawPieces" placeholder="0" min="0" inputmode="numeric">
+        </div>
+        <div class="os-form-group" style="margin-bottom:0;">
+          <div class="os-form-label">Coated Pieces</div>
+          <input type="number" id="osCoatedPieces" placeholder="0" min="0" inputmode="numeric">
+        </div>
+      </div>
+
+      <div class="os-form-group">
+        <div class="os-form-label">Notes <span style="font-size:10px;font-weight:500;color:var(--text3);">(optional)</span></div>
+        <input type="text" id="osNotes" placeholder="e.g. Stock count as of May 19">
+      </div>
+
+      <button class="btn-primary" id="osSubmitBtn" onclick="submitOpeningEntry()">Add Entry</button>
+    </div>
+
+    <div class="section-title" style="margin-top:28px;">Opening Stock Log</div>
+    <div id="openingLogList"></div>
   </div>
 </div>
 
@@ -209,20 +310,26 @@ body{background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;min
 
 <script>
 // ── CONFIG ───────────────────────────────────────
-const CLIENT_ID         = '801481705797-g3fpo65r67n8437eti5lknpa6gqcvf3e.apps.googleusercontent.com';
-const SCOPES            = 'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/userinfo.email';
-const STOCKLENS_FOLDER  = '1hqiHgj4uhYxGYL3g2CaCsX1ICxeHWyEN';
-const COATINGLENS_FOLDER= '1qjkky9SFF6Wi726RUiLLn1tHh94o50bI';
-const PACKLENS_FOLDER   = '1iCsWVIZ1gWwYK8yRAFQJnB26dUzkUZMh';
+const CLIENT_ID          = '801481705797-g3fpo65r67n8437eti5lknpa6gqcvf3e.apps.googleusercontent.com';
+const SCOPES             = 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/userinfo.email';
+const STOCKLENS_FOLDER   = '1hqiHgj4uhYxGYL3g2CaCsX1ICxeHWyEN';
+const COATINGLENS_FOLDER = '1qjkky9SFF6Wi726RUiLLn1tHh94o50bI';
+const PACKLENS_FOLDER    = '1iCsWVIZ1gWwYK8yRAFQJnB26dUzkUZMh';
+const IL_FOLDER_ID       = '16kvrAxy08ww6kLk6gncHEaIBpG2TEJ7r';
+const OPENING_FILE       = 'inventorylens_opening.json';
+const OWNER_EMAIL        = 'adityaramnani91581@gmail.com';
 
-// ── STATE ────────────────────────────────────────
-var accessToken = null;
-var slData = null; // StockLens DB
-var clData = null; // CoatingLens DB
-var plData = null; // PackLens DB
-var lastRefresh = null;
+// ── STATE ─────────────────────────────────────────
+var accessToken  = null;
+var slData       = null;
+var clData       = null;
+var plData       = null;
+var openingData  = { entries: [] };
+var openingFileId= null;
+var lastRefresh  = null;
+var isOwner      = false;
 
-// ── AUTH ─────────────────────────────────────────
+// ── AUTH ──────────────────────────────────────────
 function signIn() {
   var client = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID, scope: SCOPES,
@@ -231,10 +338,24 @@ function signIn() {
       accessToken = resp.access_token;
       document.getElementById('authScreen').style.display = 'none';
       document.getElementById('app').style.display = 'block';
+      var email = await fetchUserProfile();
+      isOwner = (email === OWNER_EMAIL);
+      if (isOwner) {
+        document.getElementById('openingStockTab').style.display = 'inline-block';
+      }
       await refreshAll();
+      setInterval(refreshAll, 10 * 60 * 1000); // auto-refresh every 10 min
     }
   });
   client.requestAccessToken();
+}
+
+async function fetchUserProfile() {
+  try {
+    var res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo',
+      { headers: { Authorization: 'Bearer ' + accessToken } });
+    return (await res.json()).email || '';
+  } catch(e) { return ''; }
 }
 
 function signOut() {
@@ -243,7 +364,16 @@ function signOut() {
   document.getElementById('authScreen').style.display = 'flex';
 }
 
-// ── DATA LOADING ──────────────────────────────────
+// ── NAV ───────────────────────────────────────────
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nav-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.getElementById('page-' + name).classList.add('active');
+  if (el) el.classList.add('active');
+  if (name === 'opening') renderOpeningLog();
+}
+
+// ── DATA LOADING ─────────────────────────────────
 async function fetchDriveFile(folderId, filename) {
   try {
     var q = encodeURIComponent("name='" + filename + "' and '" + folderId + "' in parents and trashed=false");
@@ -255,6 +385,7 @@ async function fetchDriveFile(folderId, filename) {
     var content = await fetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media',
       { headers: { Authorization: 'Bearer ' + accessToken } });
     var json = await content.json();
+    json._fileId = data.files[0].id;
     json._modifiedTime = data.files[0].modifiedTime;
     return json;
   } catch(e) { console.warn('fetchDriveFile failed:', filename, e); return null; }
@@ -267,13 +398,22 @@ async function refreshAll() {
       fetchDriveFile(STOCKLENS_FOLDER,   'stocklens_db.json'),
       fetchDriveFile(COATINGLENS_FOLDER, 'coatinglens_db.json'),
       fetchDriveFile(PACKLENS_FOLDER,    'packlens_db.json'),
+      fetchDriveFile(IL_FOLDER_ID,       OPENING_FILE),
     ]);
     slData = results[0];
     clData = results[1];
     plData = results[2];
+    if (results[3]) {
+      openingData  = results[3];
+      openingFileId= results[3]._fileId;
+    } else {
+      openingData  = { entries: [] };
+      openingFileId= null;
+    }
     lastRefresh = new Date();
     renderDashboard();
     renderSourceStatus();
+    if (document.getElementById('page-opening').classList.contains('active')) renderOpeningLog();
   } catch(e) {
     console.error('refreshAll error:', e);
     showToast('Error loading data', 'error');
@@ -283,47 +423,240 @@ async function refreshAll() {
 
 function setLoading(on) {
   var btn = document.getElementById('refreshBtn');
-  var spinner = document.getElementById('loadingBar');
+  var bar = document.getElementById('loadingBar');
   if (btn) btn.disabled = on;
-  if (spinner) spinner.style.display = on ? 'block' : 'none';
+  if (bar) bar.style.display = on ? 'block' : 'none';
+}
+
+// ── OPENING STOCK SAVE ────────────────────────────
+async function saveOpeningStock() {
+  var blob = new Blob([JSON.stringify(openingData, null, 2)], { type: 'application/json' });
+  if (openingFileId) {
+    await fetch('https://www.googleapis.com/upload/drive/v3/files/' + openingFileId + '?uploadType=media',
+      { method: 'PATCH', headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: blob });
+  } else {
+    var form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify({ name: OPENING_FILE, parents: [IL_FOLDER_ID] })], { type: 'application/json' }));
+    form.append('file', blob);
+    var res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
+      { method: 'POST', headers: { Authorization: 'Bearer ' + accessToken }, body: form });
+    openingFileId = (await res.json()).id;
+  }
+}
+
+// ── OPENING STOCK ENTRY ───────────────────────────
+var openingDraftCategory = null;
+
+function selectOpeningCategory(el, catId) {
+  openingDraftCategory = catId;
+  document.querySelectorAll('.os-cat-pill').forEach(function(p){ p.classList.remove('selected'); });
+  el.classList.add('selected');
+  var isBed = catId === 'bed';
+  document.getElementById('osShapeRow').style.display = 'block';
+  document.getElementById('osSizeGroup').style.display = isBed ? 'block' : 'none';
+  document.getElementById('osMattressGroup').style.display = isBed ? 'block' : 'none';
+  document.getElementById('osColourGroup').style.display = catId !== 'chair' ? 'block' : 'none';
+  // Populate shape options
+  var shapes = {
+    bed:   ['Round','Square','Metal','Headboard','Element','Trolley','Oslo','Golden','Nesto','LG','Wooden','Base'],
+    table: ['Duke','Lizon'],
+    chair: ['Eva'],
+  };
+  var sel = document.getElementById('osShape');
+  sel.innerHTML = '<option value="">Select shape</option>'
+    + (shapes[catId]||[]).map(function(s){ return '<option value="' + s + '">' + s + '</option>'; }).join('');
+}
+
+async function submitOpeningEntry() {
+  var category = openingDraftCategory;
+  var shape    = document.getElementById('osShape').value;
+  var size     = category === 'bed' ? document.getElementById('osSize').value : (category === 'table' ? 'Table' : 'Chair');
+  var mattress = category === 'bed' ? document.getElementById('osMattress').value : 'Without Mattress';
+  var colour   = category !== 'chair' ? document.getElementById('osColour').value : null;
+  var rawPcs   = parseInt(document.getElementById('osRawPieces').value) || 0;
+  var coatedPcs= category !== 'chair' ? (parseInt(document.getElementById('osCoatedPieces').value) || 0) : 0;
+  var notes    = document.getElementById('osNotes').value.trim();
+
+  if (!category) { showToast('Select a category', 'error'); return; }
+  if (!shape)    { showToast('Select a shape', 'error'); return; }
+  if (category === 'bed' && !size) { showToast('Select a size', 'error'); return; }
+  if (category === 'bed' && !mattress) { showToast('Select mattress type', 'error'); return; }
+  if (rawPcs === 0 && coatedPcs === 0) { showToast('Enter at least one piece count', 'error'); return; }
+
+  var entry = {
+    id: 'OS' + Date.now(),
+    date: new Date().toISOString(),
+    category: category,
+    shape: shape,
+    size: size,
+    mattress: mattress,
+    colour: colour || null,
+    rawPieces: rawPcs,
+    coatedPieces: coatedPcs,
+    notes: notes,
+  };
+
+  var btn = document.getElementById('osSubmitBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+
+  try {
+    openingData.entries.unshift(entry);
+    await saveOpeningStock();
+    showToast('Opening stock saved ✓', 'success');
+    resetOpeningForm();
+    renderDashboard();
+    renderOpeningLog();
+  } catch(e) {
+    openingData.entries.shift();
+    showToast('Error saving', 'error');
+    console.error(e);
+  }
+  btn.disabled = false; btn.textContent = 'Add Entry';
+}
+
+function resetOpeningForm() {
+  openingDraftCategory = null;
+  document.querySelectorAll('.os-cat-pill').forEach(function(p){ p.classList.remove('selected'); });
+  ['osShape','osSize','osMattress','osColour'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  ['osRawPieces','osCoatedPieces','osNotes'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('osShapeRow').style.display = 'none';
+  document.getElementById('osSizeGroup').style.display = 'none';
+  document.getElementById('osMattressGroup').style.display = 'none';
+  document.getElementById('osColourGroup').style.display = 'none';
+}
+
+async function deleteOpeningEntry(id) {
+  if (!confirm('Delete this opening stock entry?')) return;
+  openingData.entries = openingData.entries.filter(function(e){ return e.id !== id; });
+  try {
+    await saveOpeningStock();
+    showToast('Deleted', 'success');
+    renderDashboard();
+    renderOpeningLog();
+  } catch(e) { showToast('Error saving', 'error'); }
+}
+
+function renderOpeningLog() {
+  var el = document.getElementById('openingLogList');
+  if (!el) return;
+  var entries = openingData.entries || [];
+  if (entries.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>No opening stock entries yet</p></div>';
+    return;
+  }
+  el.innerHTML = entries.map(function(e) {
+    var dt = new Date(e.date).toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    return '<div class="os-log-card">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
+      + '<div><div style="font-size:14px;font-weight:700;color:var(--text);">' + e.shape + (e.size && e.size !== 'Table' && e.size !== 'Chair' ? ' • ' + e.size : '') + '</div>'
+      + '<div style="font-size:12px;color:var(--text2);margin-top:2px;">' + e.mattress + (e.colour ? ' • ' + e.colour : '') + '</div>'
+      + '<div style="font-size:11px;color:var(--text3);margin-top:2px;">' + dt + '</div></div>'
+      + (isOwner ? '<button onclick="deleteOpeningEntry(\'' + e.id + '\')" style="background:none;border:none;color:var(--danger);font-size:18px;cursor:pointer;">×</button>' : '')
+      + '</div>'
+      + '<div style="display:flex;gap:16px;margin-top:10px;">'
+      + '<div style="text-align:center;"><div style="font-size:20px;font-weight:800;color:#8e44ad;">' + e.rawPieces + '</div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;">Raw</div></div>'
+      + '<div style="text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--accent);">' + e.coatedPieces + '</div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;">Coated</div></div>'
+      + '</div>'
+      + (e.notes ? '<div style="font-size:12px;color:var(--text2);margin-top:8px;">📝 ' + e.notes + '</div>' : '')
+      + '</div>';
+  }).join('');
+}
+
+// ── OPENING STOCK COMPUTATION ─────────────────────
+function computeOpeningReceived() {
+  var map = {};
+  (openingData.entries||[]).forEach(function(e) {
+    if (!e.rawPieces && !e.coatedPieces) return;
+    var mattress = normaliseMattress(e.mattress);
+    var key = (e.shape||'') + '|' + (e.size||'') + '|' + mattress;
+    if (!map[key]) map[key] = { shape: e.shape, size: e.size, mattress: mattress, received: 0 };
+    // Opening raw + opening coated both count as "received" for the received→coated pipeline
+    map[key].received += (e.rawPieces||0) + (e.coatedPieces||0);
+  });
+  return map;
+}
+
+function computeOpeningCoated() {
+  var map = {};
+  (openingData.entries||[]).forEach(function(e) {
+    if (!e.coatedPieces) return;
+    var mattress = normaliseMattress(e.mattress);
+    var colour   = e.colour || null;
+    var key = (e.shape||'') + '|' + (e.size||'') + '|' + mattress + '|' + (colour||'_');
+    if (!map[key]) map[key] = { shape: e.shape, size: e.size, mattress: mattress, colour: colour, coated: 0 };
+    map[key].coated += (e.coatedPieces||0);
+  });
+  return map;
 }
 
 // ── PIPELINE COMPUTATION ──────────────────────────
 
-// StockLens → received by shape+size+mattress
+function normaliseMattress(m) {
+  if (!m) return 'Unknown';
+  var s = m.trim().toLowerCase();
+  if (s === 'with mattress')    return 'With Mattress';
+  if (s === 'without mattress') return 'Without Mattress';
+  if (s === 'n/a' || s === 'frame only' || s === 'none') return 'Without Mattress';
+  return m.trim();
+}
+
+function packedHasMattress(mattressType) {
+  var s = (mattressType||'').toLowerCase();
+  return s === 'single layer' || s === 'double layer' || s === 'ortho tri-layer';
+}
+
 function computeReceived() {
-  if (!slData || !slData.shipments) return {};
   var map = {};
-  slData.shipments.forEach(function(s) {
-    if (s.status === 'deleted') return;
-    (s.lineItems||[]).forEach(function(l) {
-      var mattress = normaliseMattress(l.mattress);
-      var key = (l.shape||'') + '|' + (l.size||'') + '|' + mattress;
-      if (!map[key]) map[key] = { shape: l.shape, size: l.size, mattress: mattress, received: 0 };
-      map[key].received += l.pieces;
+  function addToMap(shape, size, mattress, pieces) {
+    var key = (shape||'') + '|' + (size||'') + '|' + mattress;
+    if (!map[key]) map[key] = { shape: shape, size: size, mattress: mattress, received: 0 };
+    map[key].received += pieces;
+  }
+  // StockLens
+  if (slData && slData.shipments) {
+    slData.shipments.forEach(function(s) {
+      if (s.status === 'deleted') return;
+      (s.lineItems||[]).forEach(function(l) {
+        addToMap(l.shape, l.size, normaliseMattress(l.mattress), l.pieces);
+      });
     });
+  }
+  // Opening stock (raw + coated both were received)
+  var osRec = computeOpeningReceived();
+  Object.values(osRec).forEach(function(r) {
+    addToMap(r.shape, r.size, r.mattress, r.received);
   });
   return map;
 }
 
-// CoatingLens → coated by shape+size+mattress+colour
 function computeCoated() {
-  if (!clData || !clData.trolleys) return {};
   var map = {};
-  clData.trolleys.forEach(function(t) {
-    if (t.status === 'deleted') return;
-    (t.lineItems||[]).forEach(function(l) {
-      var mattress = normaliseMattress(l.mattress);
-      var colour   = l.colour || null;
-      var key = (l.shape||'') + '|' + (l.size||'') + '|' + mattress + '|' + (colour||'_');
-      if (!map[key]) map[key] = { shape: l.shape, size: l.size, mattress: mattress, colour: colour, coated: 0 };
-      map[key].coated += l.pieces;
+  function addToMap(shape, size, mattress, colour, pieces) {
+    var key = (shape||'') + '|' + (size||'') + '|' + mattress + '|' + (colour||'_');
+    if (!map[key]) map[key] = { shape: shape, size: size, mattress: mattress, colour: colour, coated: 0 };
+    map[key].coated += pieces;
+  }
+  // CoatingLens
+  if (clData && clData.trolleys) {
+    clData.trolleys.forEach(function(t) {
+      if (t.status === 'deleted') return;
+      (t.lineItems||[]).forEach(function(l) {
+        addToMap(l.shape, l.size, normaliseMattress(l.mattress), l.colour||null, l.pieces);
+      });
     });
+  }
+  // Opening stock coated
+  var osCoated = computeOpeningCoated();
+  Object.values(osCoated).forEach(function(c) {
+    addToMap(c.shape, c.size, c.mattress, c.colour, c.coated);
   });
   return map;
 }
 
-// PackLens → packed/dispatched by master_sku
 function computePacked() {
   if (!plData || !plData.pieces) return {};
   var map = {};
@@ -345,54 +678,27 @@ function computePacked() {
   return map;
 }
 
-// Normalise mattress strings so StockLens and CoatingLens match
-function normaliseMattress(m) {
-  if (!m) return 'Unknown';
-  var s = m.trim().toLowerCase();
-  if (s === 'with mattress')    return 'With Mattress';
-  if (s === 'without mattress') return 'Without Mattress';
-  if (s === 'n/a')              return 'Without Mattress'; // tables/chairs = frame only
-  return m;
-}
-
-// Does a PackLens mattress type count as "with mattress"?
-function packedHasMattress(mattressType) {
-  var s = (mattressType||'').toLowerCase();
-  return s === 'single layer' || s === 'double layer' || s === 'ortho tri-layer';
-}
-
-// Build full pipeline
 function buildPipeline() {
-  var received = computeReceived(); // key: shape|size|mattress
-  var coated   = computeCoated();   // key: shape|size|mattress|colour
-  var packed   = computePacked();   // key: master_sku
+  var received = computeReceived(); // shape|size|mattress
+  var coated   = computeCoated();   // shape|size|mattress|colour
+  var packed   = computePacked();   // master_sku
 
-  // ── Totals ──
   var totalReceived   = Object.values(received).reduce(function(s,r){ return s+r.received; }, 0);
   var totalCoated     = Object.values(coated).reduce(function(s,r){ return s+r.coated; }, 0);
   var totalPacked     = Object.values(packed).reduce(function(s,r){ return s+r.packed; }, 0);
   var totalDispatched = Object.values(packed).reduce(function(s,r){ return s+r.dispatched; }, 0);
 
-  // ── Frame rows ──
-  // Merge received (shape+size+mattress) with coated (shape+size+mattress+colour)
-  // For each shape+size+mattress: one row per colour found in coated
-  // If no coated entries: one row with colour = null
-
-  var shapeSizeMatt = {}; // key: shape|size|mattress
+  // Build frame rows — group by shape|size|mattress
+  // Show ONE row per group for received, then expand by colour for coated
+  var shapeSizeMatt = {};
   Object.values(received).forEach(function(r) {
     var k = r.shape + '|' + r.size + '|' + r.mattress;
-    if (!shapeSizeMatt[k]) shapeSizeMatt[k] = {
-      shape: r.shape, size: r.size, mattress: r.mattress,
-      received: 0, colours: {}
-    };
+    if (!shapeSizeMatt[k]) shapeSizeMatt[k] = { shape: r.shape, size: r.size, mattress: r.mattress, received: 0, colours: {} };
     shapeSizeMatt[k].received += r.received;
   });
   Object.values(coated).forEach(function(c) {
     var k = c.shape + '|' + c.size + '|' + c.mattress;
-    if (!shapeSizeMatt[k]) shapeSizeMatt[k] = {
-      shape: c.shape, size: c.size, mattress: c.mattress,
-      received: 0, colours: {}
-    };
+    if (!shapeSizeMatt[k]) shapeSizeMatt[k] = { shape: c.shape, size: c.size, mattress: c.mattress, received: 0, colours: {} };
     var col = c.colour || 'Unknown';
     shapeSizeMatt[k].colours[col] = (shapeSizeMatt[k].colours[col] || 0) + c.coated;
   });
@@ -406,112 +712,112 @@ function buildPipeline() {
     var isChair  = (shape === 'Eva' || size === 'Chair');
     var noMattress = (mattress === 'Without Mattress');
     var totalCoatedForGroup = Object.values(ss.colours).reduce(function(s,v){ return s+v; }, 0);
-    var colours = Object.keys(ss.colours);
+    var rawLeft  = rec - totalCoatedForGroup;
 
-    if (colours.length === 0) {
-      // Received but no coating yet
-      frameRows.push({
-        shape: shape, size: size, mattress: mattress,
-        colour: null, colourLabel: null,
-        received: rec,
-        coated: isChair ? null : 0,
-        rawLeft: rec,
-        coatedLeft: isChair ? null : 0,
-        isChair: isChair,
-      });
-    } else {
-      colours.forEach(function(colLabel) {
-        var coa      = ss.colours[colLabel];
-        var colour   = colLabel === 'Unknown' ? null : colLabel;
+    // One summary row per shape+size+mattress
+    frameRows.push({
+      type: 'group',
+      shape: shape, size: size, mattress: mattress,
+      received: rec,
+      totalCoated: isChair ? null : totalCoatedForGroup,
+      rawLeft: isChair ? null : rawLeft,
+      isChair: isChair,
+      hasColours: Object.keys(ss.colours).length > 0,
+    });
 
-        // Raw left — share received proportionally across colours
-        var recShare = colours.length === 1
-          ? rec
-          : (totalCoatedForGroup > 0 ? Math.round(rec * coa / totalCoatedForGroup) : 0);
-        var rawLeft = recShare - coa;
-
-        // Coated left:
-        // With Mattress → subtract packed pieces (any mattress type) for this shape+size+colour
-        // Without Mattress → subtract packed frame-only pieces for this shape+size+colour
+    // Colour breakdown rows (children)
+    if (!isChair) {
+      Object.keys(ss.colours).forEach(function(colLabel) {
+        var coa    = ss.colours[colLabel];
+        var colour = colLabel === 'Unknown' ? null : colLabel;
         var packedForThis = 0;
         Object.values(packed).forEach(function(pk) {
           if (pk.shape !== shape || pk.size !== size) return;
           if (colour && pk.frameColour !== colour) return;
           if (noMattress) {
-            // Only count frame-only (no mattress) packed pieces
             if (!packedHasMattress(pk.mattressType)) packedForThis += pk.packed;
           } else {
-            // Count all with-mattress packed pieces
             if (packedHasMattress(pk.mattressType)) packedForThis += pk.packed;
           }
         });
         var coatedLeft = coa - packedForThis;
-
         frameRows.push({
+          type: 'colour',
           shape: shape, size: size, mattress: mattress,
           colour: colour, colourLabel: colLabel,
-          received: recShare,
-          coated: isChair ? null : coa,
-          rawLeft: isChair ? null : rawLeft,
-          coatedLeft: isChair ? null : coatedLeft,
-          isChair: isChair,
+          coated: coa,
+          coatedLeft: coatedLeft,
+          isChair: false,
         });
       });
     }
   });
 
-  // Sort: chairs last, then shape > size > mattress > colour
-  frameRows.sort(function(a,b) {
-    if (a.isChair !== b.isChair) return a.isChair ? 1 : -1;
-    return ((a.shape||'')+(a.size||'')+(a.mattress||'')+(a.colourLabel||''))
-      .localeCompare((b.shape||'')+(b.size||'')+(b.mattress||'')+(b.colourLabel||''));
+  // Sort groups: chairs last, then alphabetically
+  var grouped = [];
+  var seen = {};
+  frameRows.forEach(function(r) {
+    if (r.type === 'group') {
+      var k = (r.shape||'') + '|' + (r.size||'') + '|' + (r.mattress||'');
+      seen[k] = grouped.length;
+      grouped.push([r]);
+    } else {
+      var k = (r.shape||'') + '|' + (r.size||'') + '|' + (r.mattress||'');
+      if (seen[k] !== undefined) grouped[seen[k]].push(r);
+    }
   });
+  grouped.sort(function(a,b) {
+    var ag = a[0]; var bg = b[0];
+    if (ag.isChair !== bg.isChair) return ag.isChair ? 1 : -1;
+    return ((ag.shape||'')+(ag.size||'')+(ag.mattress||'')).localeCompare((bg.shape||'')+(bg.size||'')+(bg.mattress||''));
+  });
+  var sortedRows = [];
+  grouped.forEach(function(g){ g.forEach(function(r){ sortedRows.push(r); }); });
 
   var productRows = Object.values(packed).sort(function(a,b){ return b.packed - a.packed; });
 
   return {
     totals: { received: totalReceived, coated: totalCoated, packed: totalPacked, dispatched: totalDispatched },
-    frameRows: frameRows,
+    frameRows: sortedRows,
     productRows: productRows,
   };
 }
-
 
 // ── RENDER DASHBOARD ──────────────────────────────
 function renderDashboard() {
   var pipeline = buildPipeline();
   var t = pipeline.totals;
-
-  // Pipeline cards
   document.getElementById('cardReceived').textContent   = t.received;
   document.getElementById('cardCoated').textContent     = t.coated;
   document.getElementById('cardPacked').textContent     = t.packed;
   document.getElementById('cardDispatched').textContent = t.dispatched;
 
-  // Derived totals
-  var rawStock     = t.received - t.coated;
-  var coatedStock  = t.coated - t.packed;
-  var finishedStock= t.packed - t.dispatched;
-  document.getElementById('cardRaw').textContent      = Math.max(0, rawStock);
-  document.getElementById('cardCoatedStock').textContent = Math.max(0, coatedStock);
-  document.getElementById('cardFinished').textContent = Math.max(0, finishedStock);
+  var rawStock      = t.received - t.coated;
+  var coatedStock   = t.coated   - t.packed;
+  var finishedStock = t.packed   - t.dispatched;
+  document.getElementById('cardRaw').textContent          = Math.max(0, rawStock);
+  document.getElementById('cardCoatedStock').textContent  = Math.max(0, coatedStock);
+  document.getElementById('cardFinished').textContent     = Math.max(0, finishedStock);
+
+  // Opening stock badge
+  var osCount = (openingData.entries||[]).length;
+  var osEl = document.getElementById('openingStockBadge');
+  if (osEl) osEl.textContent = osCount > 0 ? osCount + ' entries' : 'Not set';
+  if (osEl) osEl.style.color = osCount > 0 ? 'var(--success)' : 'var(--danger)';
 
   // Alerts
   var alerts = [];
-  if (rawStock < 0)     alerts.push({ type: 'danger', msg: 'Coated pieces (' + t.coated + ') exceed received (' + t.received + '). Check StockLens entries.' });
-  if (coatedStock < 0)  alerts.push({ type: 'danger', msg: 'Packed pieces (' + t.packed + ') exceed coated (' + t.coated + '). Missing CoatingLens entries.' });
+  if (osCount === 0) alerts.push({ type: 'warning', msg: 'Opening stock not set. Numbers may be inaccurate. Add opening stock entries to get accurate counts.' });
+  if (rawStock < 0)    alerts.push({ type: 'danger', msg: 'Coated (' + t.coated + ') exceeds received (' + t.received + '). Check StockLens entries or add opening stock.' });
+  if (coatedStock < 0) alerts.push({ type: 'danger', msg: 'Packed (' + t.packed + ') exceeds coated (' + t.coated + '). Check CoatingLens entries or add opening stock.' });
   renderAlerts(alerts);
 
-  // Frame table
   renderFrameTable(pipeline.frameRows);
-
-  // Product table
   renderProductTable(pipeline.productRows);
+  if (lastRefresh) document.getElementById('lastRefreshLabel').textContent = 'Updated ' + lastRefresh.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
 
-  // Last refresh
-  if (lastRefresh) {
-    document.getElementById('lastRefreshLabel').textContent = 'Updated ' + lastRefresh.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-  }
+  // Re-render drilldown if open
+  if (activeDrilldown) renderDrilldown(activeDrilldown);
 }
 
 function renderAlerts(alerts) {
@@ -519,111 +825,199 @@ function renderAlerts(alerts) {
   if (alerts.length === 0) { el.style.display = 'none'; return; }
   el.style.display = 'block';
   el.innerHTML = alerts.map(function(a) {
-    return '<div class="alert alert-' + a.type + '">'
-      + (a.type === 'danger' ? '\u26a0\ufe0f ' : '\u26a0\ufe0f ') + a.msg + '</div>';
+    return '<div class="alert alert-' + a.type + '">' + a.msg + '</div>';
   }).join('');
 }
 
 function renderFrameTable(rows) {
   var el = document.getElementById('frameTableBody');
   if (!rows || rows.length === 0) {
-    el.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:24px;">No data</td></tr>'; return;
+    el.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px;">No data</td></tr>'; return;
   }
-
-  // Split beds/tables from chairs
-  var bedRows   = rows.filter(function(r){ return !r.isChair; });
-  var chairRows = rows.filter(function(r){ return r.isChair; });
-
-  function renderRows(arr) {
-    return arr.map(function(r) {
+  el.innerHTML = rows.map(function(r) {
+    if (r.type === 'group') {
+      // Summary row — no colour breakdown
       var rawClass = r.rawLeft !== null ? (r.rawLeft < 0 ? 'neg' : r.rawLeft === 0 ? 'zero' : 'pos') : '';
-      var coatedClass = r.coatedLeft !== null ? (r.coatedLeft < 0 ? 'neg' : r.coatedLeft === 0 ? 'zero' : 'pos') : '';
-      return '<tr>'
+      return '<tr class="group-row">'
         + '<td><div class="ft-shape">' + (r.shape||'') + '</div></td>'
         + '<td>' + (r.size||'') + '</td>'
-        + '<td><span style="font-size:12px;color:var(--text2);">' + (r.mattress||'') + '</span></td>'
-        + '<td>' + (r.colourLabel && r.colourLabel !== 'Unknown' ? '<span class="colour-dot" style="background:' + colourHex(r.colourLabel) + '"></span>' + r.colourLabel : r.colour ? '<span class="colour-dot" style="background:' + colourHex(r.colour) + '"></span>' + r.colour : '<span style="color:var(--text3)">—</span>') + '</td>'
-        + '<td class="num">' + r.received + '</td>'
-        + '<td class="num">' + (r.coated !== null ? r.coated : '<span style="color:var(--text3)">—</span>') + '</td>'
-        + '<td class="num ' + rawClass + '">' + r.rawLeft + '</td>'
-        + '<td class="num ' + coatedClass + '">' + (r.coatedLeft !== null ? r.coatedLeft : '<span style="color:var(--text3)">—</span>') + '</td>'
+        + '<td><span class="mattress-tag">' + (r.mattress||'') + '</span></td>'
+        + '<td class="num rec-col">' + r.received + '</td>'
+        + '<td class="num coa-col">' + (r.totalCoated !== null ? r.totalCoated : '<span style="color:var(--text3)">—</span>') + '</td>'
+        + '<td class="num ' + rawClass + '">' + (r.rawLeft !== null ? r.rawLeft : '<span style="color:var(--text3)">—</span>') + '</td>'
+        + '<td class="num" style="color:var(--text3);">—</td>'
         + '</tr>';
-    }).join('');
-  }
-
-  var html = renderRows(bedRows);
-  if (chairRows.length > 0) {
-    html += '<tr class="section-divider"><td colspan="8">Chair (Eva) \u2014 no coating stage</td></tr>';
-    html += renderRows(chairRows);
-  }
-  el.innerHTML = html;
+    } else {
+      // Colour child row
+      var coatedClass = r.coatedLeft < 0 ? 'neg' : r.coatedLeft === 0 ? 'zero' : 'pos';
+      var colDot = r.colour
+        ? '<span class="colour-dot" style="background:' + colourHex(r.colour) + '"></span>' + r.colour
+        : '<span style="color:var(--text3);font-size:11px;">Unknown</span>';
+      return '<tr class="colour-row">'
+        + '<td colspan="2" style="padding-left:28px;font-size:12px;color:var(--text3);">' + colDot + '</td>'
+        + '<td></td>'
+        + '<td class="num rec-col" style="color:var(--text3);">—</td>'
+        + '<td class="num coa-col">' + r.coated + '</td>'
+        + '<td class="num" style="color:var(--text3);">—</td>'
+        + '<td class="num ' + coatedClass + '">' + r.coatedLeft + '</td>'
+        + '</tr>';
+    }
+  }).join('');
 }
 
 function renderProductTable(rows) {
   var el = document.getElementById('productTableBody');
   if (!rows || rows.length === 0) {
-    el.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:24px;">No PackLens data</td></tr>'; return;
+    el.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:24px;">No PackLens data</td></tr>'; return;
   }
   el.innerHTML = rows.map(function(r) {
     var inStock = r.packed - r.dispatched;
-    var stockClass = inStock > 0 ? 'pos' : inStock === 0 ? 'zero' : 'neg';
+    var cls = inStock > 0 ? 'pos' : inStock === 0 ? 'zero' : 'neg';
     return '<tr>'
       + '<td><div class="ft-shape">' + r.displayName + '</div><div class="sku-cell">' + r.master_sku + '</div></td>'
       + '<td class="num">' + r.packed + '</td>'
       + '<td class="num">' + r.dispatched + '</td>'
-      + '<td class="num ' + stockClass + '">' + inStock + '</td>'
+      + '<td class="num ' + cls + '">' + inStock + '</td>'
       + '</tr>';
   }).join('');
 }
 
-function colourHex(colour) {
-  var map = { 'Black': '#222', 'White': '#eee', 'Golden': '#c8a84b', 'Ivory': '#e8dcc8' };
-  return map[colour] || '#888';
-}
-
 // ── SOURCE STATUS ─────────────────────────────────
 function renderSourceStatus() {
-  function sourceCard(name, data, file) {
+  function card(name, data, file, countKey) {
     var ok = !!data;
     var count = 0;
-    var lastMod = '';
     if (data) {
       if (data.shipments) count = data.shipments.filter(function(s){ return s.status !== 'deleted'; }).length;
       if (data.trolleys)  count = data.trolleys.filter(function(t){ return t.status !== 'deleted'; }).length;
       if (data.pieces)    count = Object.keys(data.pieces).length;
-      if (data._modifiedTime) {
-        lastMod = new Date(data._modifiedTime).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
-      }
+      if (data.entries)   count = data.entries.length;
     }
+    var lastMod = data && data._modifiedTime
+      ? new Date(data._modifiedTime).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})
+      : '';
     return '<div class="source-card ' + (ok ? 'source-ok' : 'source-err') + '">'
       + '<div class="source-name">' + name + '</div>'
       + '<div class="source-file">' + file + '</div>'
-      + (ok
-        ? '<div class="source-stat">' + count + ' records</div><div class="source-time">' + lastMod + '</div>'
-        : '<div class="source-stat source-missing">Not found</div>')
+      + (ok ? '<div class="source-stat">' + count + ' records</div><div class="source-time">' + lastMod + '</div>'
+            : '<div class="source-stat source-missing">Not found</div>')
       + '</div>';
   }
   document.getElementById('sourceStatus').innerHTML =
-    sourceCard('StockLens',   slData, 'stocklens_db.json')
-    + sourceCard('CoatingLens', clData, 'coatinglens_db.json')
-    + sourceCard('PackLens',    plData, 'packlens_db.json');
+    card('StockLens',     slData,       'stocklens_db.json')
+    + card('CoatingLens', clData,       'coatinglens_db.json')
+    + card('PackLens',    plData,       'packlens_db.json')
+    + card('Opening Stock', openingData.entries && openingData.entries.length > 0 ? openingData : null, OPENING_FILE);
 }
 
-// ── FILTER / SEARCH ───────────────────────────────
-var activeShapeFilter = '';
-var activeColourFilter = '';
+// ── DRILLDOWN ─────────────────────────────────────
+var activeDrilldown = null;
 
+function toggleDrilldown(type) {
+  if (activeDrilldown === type) {
+    activeDrilldown = null;
+    document.getElementById('drilldownPanel').style.display = 'none';
+    document.querySelectorAll('.stock-card').forEach(function(c){ c.classList.remove('active'); });
+    return;
+  }
+  activeDrilldown = type;
+  document.querySelectorAll('.stock-card').forEach(function(c){ c.classList.remove('active'); });
+  var idx = { raw: 0, coated: 1, finished: 2 };
+  var cards = document.querySelectorAll('.stock-card');
+  if (cards[idx[type]]) cards[idx[type]].classList.add('active');
+  renderDrilldown(type);
+}
+
+function renderDrilldown(type) {
+  var panel = document.getElementById('drilldownPanel');
+  panel.style.display = 'block';
+  var pipeline = buildPipeline();
+  var html = '';
+  var titles = { raw: 'Raw Stock', coated: 'Coated Stock', finished: 'Finished Stock' };
+
+  if (type === 'raw') {
+    var rawMap = {};
+    pipeline.frameRows.forEach(function(r) {
+      if (r.type !== 'group' || r.rawLeft === null) return;
+      var k = r.shape + '|' + r.size + '|' + r.mattress;
+      if (!rawMap[k]) rawMap[k] = { shape: r.shape, size: r.size, mattress: r.mattress, rawLeft: 0 };
+      rawMap[k].rawLeft += r.rawLeft;
+    });
+    var rows = Object.values(rawMap).filter(function(r){ return r.rawLeft > 0; });
+    rows.sort(function(a,b){ return b.rawLeft - a.rawLeft; });
+    var total = rows.reduce(function(s,r){ return s+r.rawLeft; }, 0);
+    html = buildDrillTable(titles[type], total, 'uncoated frames',
+      ['Shape','Size','Mattress','Raw Left'],
+      rows.map(function(r) {
+        return '<tr><td><div class="ft-shape">' + r.shape + '</div></td>'
+          + '<td>' + r.size + '</td>'
+          + '<td><span class="mattress-tag">' + r.mattress + '</span></td>'
+          + '<td class="num pos">' + r.rawLeft + '</td></tr>';
+      })
+    );
+  } else if (type === 'coated') {
+    var rows = pipeline.frameRows.filter(function(r){ return r.type === 'colour' && r.coatedLeft > 0; });
+    rows.sort(function(a,b){ return b.coatedLeft - a.coatedLeft; });
+    var total = rows.reduce(function(s,r){ return s+r.coatedLeft; }, 0);
+    html = buildDrillTable(titles[type], total, 'coated frames awaiting packing',
+      ['Shape','Size','Mattress','Colour','Coated Left'],
+      rows.map(function(r) {
+        var dot = r.colour ? '<span class="colour-dot" style="background:' + colourHex(r.colour) + '"></span>' + r.colour : '—';
+        return '<tr><td><div class="ft-shape">' + r.shape + '</div></td>'
+          + '<td>' + r.size + '</td>'
+          + '<td><span class="mattress-tag">' + r.mattress + '</span></td>'
+          + '<td>' + dot + '</td>'
+          + '<td class="num" style="color:var(--accent);">' + r.coatedLeft + '</td></tr>';
+      })
+    );
+  } else if (type === 'finished') {
+    var rows = pipeline.productRows.filter(function(r){ return (r.packed - r.dispatched) > 0; });
+    rows.sort(function(a,b){ return (b.packed-b.dispatched)-(a.packed-a.dispatched); });
+    var total = rows.reduce(function(s,r){ return s+(r.packed-r.dispatched); }, 0);
+    html = buildDrillTable(titles[type], total, 'packed awaiting dispatch',
+      ['Product','Packed','Dispatched','In Stock'],
+      rows.map(function(r) {
+        return '<tr><td><div class="ft-shape">' + r.displayName + '</div>'
+          + '<div class="sku-cell">' + r.master_sku + '</div></td>'
+          + '<td class="num">' + r.packed + '</td>'
+          + '<td class="num">' + r.dispatched + '</td>'
+          + '<td class="num pos">' + (r.packed-r.dispatched) + '</td></tr>';
+      })
+    );
+  }
+  panel.innerHTML = html;
+}
+
+function buildDrillTable(title, total, subtitle, headers, rowsHTML) {
+  var headerCells = headers.map(function(h, i) {
+    return '<th' + (i > 0 ? ' class="num"' : '') + '>' + h + '</th>';
+  }).join('');
+  return '<div class="drilldown-table-wrap">'
+    + '<div class="drilldown-title">'
+    + '<span><strong>' + title + '</strong> &mdash; ' + total + ' ' + subtitle + '</span>'
+    + '<button class="drilldown-close" onclick="toggleDrilldown(activeDrilldown)">&times;</button>'
+    + '</div><div style="overflow:auto;">'
+    + '<table class="inv-table"><thead><tr>' + headerCells + '</tr></thead>'
+    + '<tbody>' + (rowsHTML.length > 0 ? rowsHTML.join('') : '<tr><td colspan="' + headers.length + '" style="text-align:center;color:var(--text3);padding:20px;">Nothing here</td></tr>') + '</tbody>'
+    + '</table></div></div>';
+}
+
+// ── FILTER ────────────────────────────────────────
 function applyFilters() {
   var shapeQ  = document.getElementById('filterShape').value.trim().toLowerCase();
   var colourQ = document.getElementById('filterColour').value;
-  activeShapeFilter  = shapeQ;
-  activeColourFilter = colourQ;
-
   var pipeline = buildPipeline();
+
   var filtered = pipeline.frameRows.filter(function(r) {
-    if (shapeQ  && (r.shape||'').toLowerCase().indexOf(shapeQ) === -1) return false;
-    if (colourQ && r.colour !== colourQ) return false;
-    return true;
+    if (r.type === 'group') {
+      if (shapeQ && (r.shape||'').toLowerCase().indexOf(shapeQ) === -1) return false;
+      if (colourQ) return false; // hide group rows when filtering by colour — show colour rows only
+      return true;
+    } else {
+      if (shapeQ && (r.shape||'').toLowerCase().indexOf(shapeQ) === -1) return false;
+      if (colourQ && r.colour !== colourQ) return false;
+      return true;
+    }
   });
   renderFrameTable(filtered);
 
@@ -638,132 +1032,19 @@ function applyFilters() {
 function clearFilters() {
   document.getElementById('filterShape').value = '';
   document.getElementById('filterColour').value = '';
-  activeShapeFilter = ''; activeColourFilter = '';
   renderDashboard();
-}
-
-// ── DRILLDOWN ─────────────────────────────────────
-var activeDrilldown = null;
-
-function toggleDrilldown(type) {
-  // Toggle off if same card clicked
-  if (activeDrilldown === type) {
-    activeDrilldown = null;
-    document.getElementById('drilldownPanel').style.display = 'none';
-    document.querySelectorAll('.stock-card').forEach(function(c){ c.classList.remove('active'); });
-    return;
-  }
-  activeDrilldown = type;
-  document.querySelectorAll('.stock-card').forEach(function(c){ c.classList.remove('active'); });
-  var cardMap = { raw: 0, coated: 1, finished: 2 };
-  var cards = document.querySelectorAll('.stock-card');
-  if (cards[cardMap[type]]) cards[cardMap[type]].classList.add('active');
-  renderDrilldown(type);
-}
-
-function renderDrilldown(type) {
-  var panel = document.getElementById('drilldownPanel');
-  panel.style.display = 'block';
-
-  var pipeline = buildPipeline();
-  var html = '';
-  var titles = { raw: 'Raw Stock Breakdown', coated: 'Coated Stock Breakdown', finished: 'Finished Stock Breakdown' };
-  var title = titles[type] || '';
-
-  if (type === 'raw') {
-    // Raw = received - coated, per shape+size+mattress
-    // Aggregate from frameRows
-    var rawMap = {};
-    pipeline.frameRows.forEach(function(r) {
-      if (r.isChair) return;
-      var k = (r.shape||'') + '|' + (r.size||'') + '|' + (r.mattress||'');
-      if (!rawMap[k]) rawMap[k] = { shape: r.shape, size: r.size, mattress: r.mattress, rawLeft: 0 };
-      if (r.rawLeft !== null) rawMap[k].rawLeft += r.rawLeft;
-    });
-    // Add chairs
-    pipeline.frameRows.forEach(function(r) {
-      if (!r.isChair) return;
-      var k = (r.shape||'') + '|Chair';
-      if (!rawMap[k]) rawMap[k] = { shape: r.shape, size: 'Chair', mattress: '—', rawLeft: 0 };
-      if (r.rawLeft !== null) rawMap[k].rawLeft += r.rawLeft;
-    });
-    var rows = Object.values(rawMap).filter(function(r){ return r.rawLeft > 0; });
-    rows.sort(function(a,b){ return b.rawLeft - a.rawLeft; });
-    var total = rows.reduce(function(s,r){ return s+r.rawLeft; }, 0);
-
-    html = buildDrillTable(title, total, 'pieces uncoated',
-      ['Shape','Size','Mattress','Raw Left'],
-      rows.map(function(r) {
-        return '<tr><td><div class="ft-shape">' + (r.shape||'') + '</div></td>'
-          + '<td>' + (r.size||'') + '</td>'
-          + '<td style="font-size:12px;color:var(--text2);">' + (r.mattress||'') + '</td>'
-          + '<td class="num pos">' + r.rawLeft + '</td></tr>';
-      })
-    );
-
-  } else if (type === 'coated') {
-    // Coated in hand = coated - packed, per shape+size+mattress+colour
-    var rows = pipeline.frameRows.filter(function(r){ return !r.isChair && r.coatedLeft !== null && r.coatedLeft > 0; });
-    rows.sort(function(a,b){ return b.coatedLeft - a.coatedLeft; });
-    var total = rows.reduce(function(s,r){ return s+r.coatedLeft; }, 0);
-
-    html = buildDrillTable(title, total, 'frames coated, awaiting packing',
-      ['Shape','Size','Mattress','Colour','Coated Left'],
-      rows.map(function(r) {
-        var colDot = r.colour
-          ? '<span class="colour-dot" style="background:' + colourHex(r.colour) + '"></span>' + r.colour
-          : '<span style="color:var(--text3)">—</span>';
-        return '<tr><td><div class="ft-shape">' + (r.shape||'') + '</div></td>'
-          + '<td>' + (r.size||'') + '</td>'
-          + '<td style="font-size:12px;color:var(--text2);">' + (r.mattress||'') + '</td>'
-          + '<td>' + colDot + '</td>'
-          + '<td class="num" style="color:var(--accent);">' + r.coatedLeft + '</td></tr>';
-      })
-    );
-
-  } else if (type === 'finished') {
-    // Finished = packed - dispatched, per master_sku
-    var rows = pipeline.productRows.filter(function(r){ return (r.packed - r.dispatched) > 0; });
-    rows.sort(function(a,b){ return (b.packed-b.dispatched) - (a.packed-a.dispatched); });
-    var total = rows.reduce(function(s,r){ return s+(r.packed-r.dispatched); }, 0);
-
-    html = buildDrillTable(title, total, 'packed, awaiting dispatch',
-      ['Product','Packed','Dispatched','In Stock'],
-      rows.map(function(r) {
-        var inStock = r.packed - r.dispatched;
-        return '<tr><td><div class="ft-shape">' + r.displayName + '</div>'
-          + '<div class="sku-cell">' + r.master_sku + '</div></td>'
-          + '<td class="num">' + r.packed + '</td>'
-          + '<td class="num">' + r.dispatched + '</td>'
-          + '<td class="num pos">' + inStock + '</td></tr>';
-      })
-    );
-  }
-
-  panel.innerHTML = html;
-}
-
-function buildDrillTable(title, total, subtitle, headers, rowsHTML) {
-  var headerCells = headers.map(function(h, i) {
-    return '<th' + (i === headers.length-1 || i > 0 ? ' class="num"' : '') + '>' + h + '</th>';
-  }).join('');
-  return '<div class="drilldown-table-wrap">'
-    + '<div class="drilldown-title">'
-    + '<span>' + title + ' &mdash; <strong>' + total + '</strong> ' + subtitle + '</span>'
-    + '<button class="drilldown-close" onclick="toggleDrilldown(activeDrilldown)">&times;</button>'
-    + '</div>'
-    + '<div style="overflow:auto;">'
-    + '<table class="inv-table"><thead><tr>' + headerCells + '</tr></thead>'
-    + '<tbody>' + (rowsHTML.length > 0 ? rowsHTML.join('') : '<tr><td colspan="' + headers.length + '" style="text-align:center;color:var(--text3);padding:20px;">Nothing here</td></tr>') + '</tbody>'
-    + '</table></div></div>';
 }
 
 // ── EXPORT ────────────────────────────────────────
 function exportCSV() {
   var pipeline = buildPipeline();
-  var rows = [['Shape','Size','Colour','Received','Coated','Raw Left','Coated Left']];
+  var rows = [['Type','Shape','Size','Mattress','Colour','Received','Coated','Raw Left','Coated Left']];
   pipeline.frameRows.forEach(function(r) {
-    rows.push([r.shape, r.size, r.colour||'', r.received, r.coated||'', r.rawLeft, r.coatedLeft||'']);
+    if (r.type === 'group') {
+      rows.push(['Frame',r.shape,r.size,r.mattress,'',r.received,r.totalCoated||'',r.rawLeft||'','']);
+    } else {
+      rows.push(['Colour Detail',r.shape,r.size,r.mattress,r.colourLabel||'','',r.coated,'',r.coatedLeft]);
+    }
   });
   rows.push([]);
   rows.push(['Master SKU','Product','Packed','Dispatched','In Stock']);
@@ -776,6 +1057,10 @@ function exportCSV() {
 }
 
 // ── UTILS ─────────────────────────────────────────
+function colourHex(c) {
+  return { Black:'#222', White:'#eee', Golden:'#c8a84b', Ivory:'#e8dcc8' }[c] || '#888';
+}
+
 function showToast(msg, type) {
   var t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast show ' + (type||'');
