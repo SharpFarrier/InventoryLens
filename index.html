@@ -49,6 +49,7 @@ body{background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;min
 .stock-card .drill-hint{font-size:10px;color:var(--text3);margin-top:6px;}
 .stock-card.active .drill-hint{color:var(--accent);}
 .stock-raw .val{color:#8e44ad;}
+.stock-picked .val{color:#2980b9;}
 .stock-coated .val{color:var(--accent);}
 .stock-finished .val{color:var(--success);}
 /* Opening stock badge */
@@ -59,7 +60,7 @@ body{background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;min
 .alert-danger{background:rgba(192,57,43,0.08);border:1.5px solid rgba(192,57,43,0.3);color:var(--danger);}
 .alert-warning{background:rgba(243,156,18,0.08);border:1.5px solid rgba(243,156,18,0.3);color:#e67e22;}
 /* Source cards */
-.source-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;}
+.source-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
 .source-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;}
 .source-ok{border-left:3px solid var(--success);}
 .source-err{border-left:3px solid var(--danger);}
@@ -178,22 +179,27 @@ select:focus,input:focus,textarea:focus{border-color:var(--accent);}
 
     <!-- Pipeline totals -->
     <div class="section-title">Pipeline Totals</div>
-    <div class="pipeline-row">
+    <div class="pipeline-row" style="grid-template-columns:repeat(5,1fr);">
       <div class="pipeline-card"><div class="val" id="cardReceived">—</div><div class="lbl">Received</div></div>
       <div class="pipeline-card"><div class="val" id="cardCoated">—</div><div class="lbl">Coated</div></div>
+      <div class="pipeline-card"><div class="val" id="cardPicked">—</div><div class="lbl">Picked</div></div>
       <div class="pipeline-card"><div class="val" id="cardPacked">—</div><div class="lbl">Packed</div></div>
       <div class="pipeline-card"><div class="val" id="cardDispatched">—</div><div class="lbl">Dispatched</div></div>
     </div>
 
     <!-- Current stock -->
     <div class="section-title">Current Stock <span style="font-size:10px;font-weight:600;color:var(--text3);">(tap a card for breakdown)</span></div>
-    <div class="stock-row">
+    <div class="stock-row" style="grid-template-columns:repeat(4,1fr);">
       <div class="stock-card stock-raw" onclick="toggleDrilldown('raw')">
         <div class="val" id="cardRaw">—</div><div class="lbl">Raw</div>
         <div class="drill-hint">tap to expand</div>
       </div>
       <div class="stock-card stock-coated" onclick="toggleDrilldown('coated')">
         <div class="val" id="cardCoatedStock">—</div><div class="lbl">Coated</div>
+        <div class="drill-hint">tap to expand</div>
+      </div>
+      <div class="stock-card stock-picked" onclick="toggleDrilldown('picked')">
+        <div class="val" id="cardPickedStock">—</div><div class="lbl">Picked</div>
         <div class="drill-hint">tap to expand</div>
       </div>
       <div class="stock-card stock-finished" onclick="toggleDrilldown('finished')">
@@ -336,6 +342,7 @@ const SCOPES             = 'https://www.googleapis.com/auth/drive https://www.go
 const STOCKLENS_FOLDER   = '1hqiHgj4uhYxGYL3g2CaCsX1ICxeHWyEN';
 const COATINGLENS_FOLDER = '1qjkky9SFF6Wi726RUiLLn1tHh94o50bI';
 const PACKLENS_FOLDER    = '1iCsWVIZ1gWwYK8yRAFQJnB26dUzkUZMh';
+const PICKLENS_FOLDER    = '1i2Y364DQG7JLnddNzpP3RmKCPEkkK6Ll';
 const IL_FOLDER_ID       = '16kvrAxy08ww6kLk6gncHEaIBpG2TEJ7r';
 const OPENING_FILE       = 'inventorylens_opening.json';
 const OWNER_EMAIL        = 'adityaramnani91581@gmail.com';
@@ -345,6 +352,7 @@ var accessToken  = null;
 var slData       = null;
 var clData       = null;
 var plData       = null;
+var pkData       = null; // PickLens DB
 var openingData  = { entries: [] };
 var openingFileId= null;
 var lastRefresh  = null;
@@ -419,14 +427,16 @@ async function refreshAll() {
       fetchDriveFile(STOCKLENS_FOLDER,   'stocklens_db.json'),
       fetchDriveFile(COATINGLENS_FOLDER, 'coatinglens_db.json'),
       fetchDriveFile(PACKLENS_FOLDER,    'packlens_db.json'),
+      fetchDriveFile(PICKLENS_FOLDER,    'picklens_db.json'),
       fetchDriveFile(IL_FOLDER_ID,       OPENING_FILE),
     ]);
     slData = results[0];
     clData = results[1];
     plData = results[2];
-    if (results[3]) {
-      openingData  = results[3];
-      openingFileId= results[3]._fileId;
+    pkData = results[3];
+    if (results[4]) {
+      openingData  = results[4];
+      openingFileId= results[4]._fileId;
     } else {
       openingData  = { entries: [] };
       openingFileId= null;
@@ -722,6 +732,24 @@ function computeCoated() {
   return map;
 }
 
+// PickLens → picked by shape+size+mattress+colour
+function computePicked() {
+  var map = {};
+  if (pkData && pkData.picks) {
+    pkData.picks.forEach(function(p) {
+      if (p.status === 'deleted') return;
+      (p.lineItems||[]).forEach(function(l) {
+        var mattress = normaliseMattress(l.mattress);
+        var colour   = l.colour || null;
+        var key = (l.shape||'') + '|' + (l.size||'') + '|' + mattress + '|' + (colour||'_');
+        if (!map[key]) map[key] = { shape: l.shape, size: l.size, mattress: mattress, colour: colour, picked: 0 };
+        map[key].picked += l.pieces;
+      });
+    });
+  }
+  return map;
+}
+
 function computePacked() {
   if (!plData || !plData.pieces) return {};
   var map = {};
@@ -746,10 +774,12 @@ function computePacked() {
 function buildPipeline() {
   var received = computeReceived(); // shape|size|mattress
   var coated   = computeCoated();   // shape|size|mattress|colour
+  var picked   = computePicked();   // shape|size|mattress|colour
   var packed   = computePacked();   // master_sku
 
   var totalReceived   = Object.values(received).reduce(function(s,r){ return s+r.received; }, 0);
   var totalCoated     = Object.values(coated).reduce(function(s,r){ return s+r.coated; }, 0);
+  var totalPicked     = Object.values(picked).reduce(function(s,r){ return s+r.picked; }, 0);
   var totalPacked     = Object.values(packed).reduce(function(s,r){ return s+r.packed; }, 0);
   var totalDispatched = Object.values(packed).reduce(function(s,r){ return s+r.dispatched; }, 0);
 
@@ -805,7 +835,10 @@ function buildPipeline() {
             if (packedHasMattress(pk.mattressType)) packedForThis += pk.packed;
           }
         });
-        var coatedLeft = coa - packedForThis;
+        // Also count picked pieces (already left coating area)
+        var pickedKey = (shape||'') + '|' + (size||'') + '|' + mattress + '|' + (colour||'_');
+        var pickedForThis = picked[pickedKey] ? picked[pickedKey].picked : 0;
+        var coatedLeft = coa - pickedForThis;
         frameRows.push({
           type: 'colour',
           shape: shape, size: size, mattress: mattress,
@@ -842,7 +875,7 @@ function buildPipeline() {
   var productRows = Object.values(packed).sort(function(a,b){ return b.packed - a.packed; });
 
   return {
-    totals: { received: totalReceived, coated: totalCoated, packed: totalPacked, dispatched: totalDispatched },
+    totals: { received: totalReceived, coated: totalCoated, picked: totalPicked, packed: totalPacked, dispatched: totalDispatched },
     frameRows: sortedRows,
     productRows: productRows,
   };
@@ -854,14 +887,17 @@ function renderDashboard() {
   var t = pipeline.totals;
   document.getElementById('cardReceived').textContent   = t.received;
   document.getElementById('cardCoated').textContent     = t.coated;
+  document.getElementById('cardPicked').textContent     = t.picked || 0;
   document.getElementById('cardPacked').textContent     = t.packed;
   document.getElementById('cardDispatched').textContent = t.dispatched;
 
   var rawStock      = t.received - t.coated;
-  var coatedStock   = t.coated   - t.packed;
+  var coatedStock   = t.coated   - (t.picked||0);
+  var pickedStock   = (t.picked||0) - t.packed;
   var finishedStock = t.packed   - t.dispatched;
   document.getElementById('cardRaw').textContent          = Math.max(0, rawStock);
   document.getElementById('cardCoatedStock').textContent  = Math.max(0, coatedStock);
+  document.getElementById('cardPickedStock').textContent  = Math.max(0, pickedStock);
   document.getElementById('cardFinished').textContent     = Math.max(0, finishedStock);
 
   // Opening stock badge
@@ -874,7 +910,8 @@ function renderDashboard() {
   var alerts = [];
   if (osCount === 0) alerts.push({ type: 'warning', msg: 'Opening stock not set. Numbers may be inaccurate. Add opening stock entries to get accurate counts.' });
   if (rawStock < 0)    alerts.push({ type: 'danger', msg: 'Coated (' + t.coated + ') exceeds received (' + t.received + '). Check StockLens entries or add opening stock.' });
-  if (coatedStock < 0) alerts.push({ type: 'danger', msg: 'Packed (' + t.packed + ') exceeds coated (' + t.coated + '). Check CoatingLens entries or add opening stock.' });
+  if (coatedStock < 0) alerts.push({ type: 'danger', msg: 'Picked (' + t.picked + ') exceeds coated (' + t.coated + '). Check CoatingLens or PickLens entries.' });
+  if ((t.picked||0) > 0 && t.packed > (t.picked||0)) alerts.push({ type: 'warning', msg: 'Packed (' + t.packed + ') exceeds picked (' + t.picked + '). Some packed pieces may not have been logged in PickLens.' });
   renderAlerts(alerts);
 
   renderFrameTable(pipeline.frameRows);
@@ -971,6 +1008,7 @@ function renderSourceStatus() {
   document.getElementById('sourceStatus').innerHTML =
     card('StockLens',     slData,       'stocklens_db.json')
     + card('CoatingLens', clData,       'coatinglens_db.json')
+    + card('PickLens',    pkData,       'picklens_db.json')
     + card('PackLens',    plData,       'packlens_db.json')
     + card('Opening Stock', openingData.entries && openingData.entries.length > 0 ? openingData : null, OPENING_FILE);
 }
@@ -987,7 +1025,7 @@ function toggleDrilldown(type) {
   }
   activeDrilldown = type;
   document.querySelectorAll('.stock-card').forEach(function(c){ c.classList.remove('active'); });
-  var idx = { raw: 0, coated: 1, finished: 2 };
+  var idx = { raw: 0, coated: 1, picked: 2, finished: 3 };
   var cards = document.querySelectorAll('.stock-card');
   if (cards[idx[type]]) cards[idx[type]].classList.add('active');
   renderDrilldown(type);
@@ -1018,6 +1056,38 @@ function renderDrilldown(type) {
           + '<td>' + r.size + '</td>'
           + '<td><span class="mattress-tag">' + r.mattress + '</span></td>'
           + '<td class="num pos">' + r.rawLeft + '</td></tr>';
+      })
+    );
+  } else if (type === 'picked') {
+    // Picked but not yet packed — from PickLens data
+    var pickedMap = {};
+    if (pkData && pkData.picks) {
+      pkData.picks.forEach(function(p) {
+        if (p.status === 'deleted') return;
+        (p.lineItems||[]).forEach(function(l) {
+          var key = (l.shape||'') + '|' + (l.size||'') + '|' + (l.colour||'');
+          if (!pickedMap[key]) pickedMap[key] = { shape: l.shape, size: l.size, colour: l.colour, mattress: l.mattress, picked: 0 };
+          pickedMap[key].picked += l.pieces;
+        });
+      });
+    }
+    // Subtract packed
+    Object.values(computePacked()).forEach(function(pk) {
+      var key = (pk.shape||'') + '|' + (pk.size||'') + '|' + (pk.frameColour||'');
+      if (pickedMap[key]) pickedMap[key].picked = Math.max(0, pickedMap[key].picked - pk.packed);
+    });
+    var rows = Object.values(pickedMap).filter(function(r){ return r.picked > 0; });
+    rows.sort(function(a,b){ return b.picked - a.picked; });
+    var total = rows.reduce(function(s,r){ return s+r.picked; }, 0);
+    html = buildDrillTable('Picked Stock', total, 'frames picked, awaiting packing',
+      ['Shape','Size','Colour','Mattress','Picked'],
+      rows.map(function(r) {
+        var dot = r.colour ? '<span class="colour-dot" style="background:' + colourHex(r.colour) + '"></span>' + r.colour : '—';
+        return '<tr><td><div class="ft-shape">' + r.shape + '</div></td>'
+          + '<td>' + (r.size||'') + '</td>'
+          + '<td>' + dot + '</td>'
+          + '<td><span class="mattress-tag">' + (r.mattress||'') + '</span></td>'
+          + '<td class="num" style="color:#2980b9;">' + r.picked + '</td></tr>';
       })
     );
   } else if (type === 'coated') {
